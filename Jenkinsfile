@@ -36,13 +36,16 @@ pipeline {
         stage('Run Tests on BrowserStack') {
             steps {
                 // Let's confirm it's there with the correct casing
-                sh 'ls -la Tests/' // Changed 'tests/' to 'Tests/'
-                 // --- ADD THESE NEW DIAGNOSTIC LINES HERE ---
+                sh 'ls -la Tests/'
+
+                // I'm adding these console.log statements to check what Node.js actually sees for my credentials.
+                // Jenkins will mask the actual values in the logs for security.
                 sh 'echo "BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME"'
                 sh 'echo "BROWSERSTACK_ACCESS_KEY: $BROWSERSTACK_ACCESS_KEY"'
-                // --- END NEW DIAGNOSTIC LINES ---
-                // Now run Mocha with the correct casing
-                sh 'npx mocha Tests/loginFavoriteSamsung.test.js' // Changed 'tests/' to 'Tests/'
+                sh 'curl -v https://hub-cloud.browserstack.com/wd/hub' // I'm checking if my Jenkins server can connect to the BrowserStack hub.
+
+        
+                sh 'npx cross-env BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY npx mocha Tests/loginFavoriteSamsung.test.js'
             }
         }
     }
