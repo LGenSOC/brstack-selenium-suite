@@ -7,6 +7,17 @@ const commonCapabilities = {
   "browserstack.networkLogs": true,
 };
 
+// --- ADDING NEW DIAGNOSTIC LINES HERE ---
+console.log(
+  "Node.js BROWSERSTACK_USERNAME:",
+  process.env.BROWSERSTACK_USERNAME
+);
+console.log(
+  "Node.js BROWSERSTACK_ACCESS_KEY:",
+  process.env.BROWSERSTACK_ACCESS_KEY
+);
+// --- ENDING NEW DIAGNOSTIC LINES ---
+
 const capabilities = [];
 
 // Configuration for Windows 10 Chrome
