@@ -51,9 +51,10 @@ pipeline {
                     // Now run Mocha, passing the credentials explicitly via cross-env
                     // Note the variable names are now BS_USERNAME and BS_ACCESS_KEY
                     sh 'npx cross-env BROWSERSTACK_USERNAME=$BS_USERNAME BROWSERSTACK_ACCESS_KEY=$BS_ACCESS_KEY npx mocha Tests/loginFavoriteSamsung.test.js' // <--- CHANGE: Variable names changed to BS_USERNAME and BS_ACCESS_KEY
-                } // 
+                } 
         }
     }
+     }
 
     // This section runs after all stages, for cleanup.
     post {
@@ -62,5 +63,4 @@ pipeline {
             cleanWs()
         }
     }
-}
 }
