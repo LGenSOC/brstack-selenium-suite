@@ -41,7 +41,7 @@ pipeline {
                 // "run my Selenium tests using Mocha".
                 // Jenkins automatically gives my test script the BrowserStack username and key
                 // that I set up in the 'environment' section.
-                sh 'npm test'
+                sh 'npx mocha tests/loginFavoriteSamsung.test.js'
             }
         }
     }
