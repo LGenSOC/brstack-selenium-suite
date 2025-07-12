@@ -1,6 +1,8 @@
 const commonCapabilities = {
-  "browserstack.user": process.env.BROWSERSTACK_USERNAME,
-  "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
+  //Updated variable names for BrowserStack credentials
+  "browserstack.user": process.env.BS_USERNAME,
+  "browserstack.key": process.env.BS_ACCESS_KEY,
+  //
   build: "BSTACK Tech Challenge",
   name: "Tech Challenge Test",
   "browserstack.debug": true,
@@ -8,14 +10,9 @@ const commonCapabilities = {
 };
 
 // --- ADDING NEW DIAGNOSTIC LINES HERE ---
-console.log(
-  "Node.js BROWSERSTACK_USERNAME:",
-  process.env.BROWSERSTACK_USERNAME
-);
-console.log(
-  "Node.js BROWSERSTACK_ACCESS_KEY:",
-  process.env.BROWSERSTACK_ACCESS_KEY
-);
+//  Updated variable names in console.log for diagnostics
+console.log("Node.js BROWSERSTACK_USERNAME:", process.env.BS_USERNAME);
+console.log("Node.js BROWSERSTACK_ACCESS_KEY:", process.env.BS_ACCESS_KEY);
 // --- ENDING NEW DIAGNOSTIC LINES ---
 
 const capabilities = [];
