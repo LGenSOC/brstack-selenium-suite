@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const commonCapabilities = {
   "browserstack.user": process.env.BROWSERSTACK_USERNAME,
   "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
