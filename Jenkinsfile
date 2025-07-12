@@ -5,8 +5,7 @@ pipeline {
 
     // Removed direct definition of BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY here.
     // This environment block is now empty or can be used for other non-credential environment variables.
-    environment {
-    } // 
+
 
     // These are the main parts (stages) of my pipeline.
     stages {
