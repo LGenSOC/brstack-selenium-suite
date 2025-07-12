@@ -37,6 +37,10 @@ pipeline {
             steps {
                 // Let's confirm it's there with the correct casing
                 sh 'ls -la Tests/' // Changed 'tests/' to 'Tests/'
+                 // --- ADD THESE NEW DIAGNOSTIC LINES HERE ---
+                sh 'echo "BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME"'
+                sh 'echo "BROWSERSTACK_ACCESS_KEY: $BROWSERSTACK_ACCESS_KEY"'
+                // --- END NEW DIAGNOSTIC LINES ---
                 // Now run Mocha with the correct casing
                 sh 'npx mocha Tests/loginFavoriteSamsung.test.js' // Changed 'tests/' to 'Tests/'
             }
