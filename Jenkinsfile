@@ -37,10 +37,10 @@ pipeline {
         stage('Run Tests on BrowserStack') {
             steps {
                 // First, I'll list what's in the 'tests' folder to make sure my test file is there.
-                sh 'ls -la tests/'
+                sh 'ls -la brstack-selenium-suite/tests/'
                 // Then, I will run my Mocha tests directly using npx.
                 // This is a common and reliable way to run locally installed binaries.
-                sh 'npx mocha tests/loginFavoriteSamsung.test.js'
+                sh 'npx mocha brstack-selenium-suite/tests/loginFavoriteSamsung.test.js'
             }
         }
     }
