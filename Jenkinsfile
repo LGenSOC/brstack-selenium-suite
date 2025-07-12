@@ -21,7 +21,7 @@ pipeline {
                 // I tell it the link to my GitHub repository.
                 git url: 'https://github.com/LGenSOC/brstack-selenium-suite.git',
                     // And I tell it which branch to get the code from (usually 'main').
-                    branch: 'main'
+                    branch: 'master'
             }
         }
         // --- Stage 2: Install Project Tools ---
