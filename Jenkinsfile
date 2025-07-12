@@ -33,14 +33,13 @@ pipeline {
                 sh 'npm install'
             }
         }
-        // --- Stage 3: Run My Tests ---
+  // --- Stage 3: Run My Tests ---
         stage('Run Tests on BrowserStack') {
             steps {
-                // This command tells Jenkins to run 'npm test'.
-                // My 'package.json' file already knows that 'npm test' means
-                // "run my Selenium tests using Mocha".
-                // Jenkins automatically gives my test script the BrowserStack username and key
-                // that I set up in the 'environment' section.
+                // First, I'll list what's in the 'tests' folder to make sure my test file is there.
+                sh 'ls -la tests/'
+                // Then, I will run my Mocha tests directly using npx.
+                // This is a common and reliable way to run locally installed binaries.
                 sh 'npx mocha tests/loginFavoriteSamsung.test.js'
             }
         }
