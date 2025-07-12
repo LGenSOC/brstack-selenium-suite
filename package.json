@@ -6,7 +6,7 @@
     "test": "tests"
 },
   "scripts": {
-    "test": "mocha tests/loginFavoriteSamsung.test.js"
+    "test": "mocha Tests/loginFavoriteSamsung.test.js"
   },
   "repository": {
     "type": "git",

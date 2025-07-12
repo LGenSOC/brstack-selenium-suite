@@ -25,7 +25,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 // Let's see where Jenkins is and what files are here!
-                sh 'pwd' // Print the current working directory
+                sh 'pwd'
                 sh 'ls -la' // List all files and directories in the current working directory
                 // I run 'npm install' to get all the necessary Node.js packages.
                 sh 'npm install'
@@ -35,9 +35,10 @@ pipeline {
         // --- Stage 3: Run My Tests ---
         stage('Run Tests on BrowserStack') {
             steps {
-                // I will run my Mocha tests directly using npx.
-                // We're reverting the path for now, based on what the 'ls -la' tells us.
-                sh 'npx mocha tests/loginFavoriteSamsung.test.js'
+                // Let's confirm it's there with the correct casing
+                sh 'ls -la Tests/' // Changed 'tests/' to 'Tests/'
+                // Now run Mocha with the correct casing
+                sh 'npx mocha Tests/loginFavoriteSamsung.test.js' // Changed 'tests/' to 'Tests/'
             }
         }
     }
