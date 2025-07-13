@@ -98,11 +98,14 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
 
     // Now, I find the "Log In" button by its ID and click it to submit the form.
     const loginButton = await driver.wait(
-      until.elementLocated(By.id("login-btn")),
+      until.elementLocated(By.id("login-btn")), // First, ensure the button is in the DOM
       15000
     );
     // Wait until the button is visible and then enabled
-    await driver.wait(until.visibilityOf(loginButton), 10000); // Wait for the button to be visible
+    // === ADJUSTMENT: Using until.elementIsVisible to confirm visibility of the LOCATED element ===
+    // The previous until.visibilityOf(loginButton) might be encountering an issue with the WebElement object itself.
+    // By re-locating or ensuring visibility by ID, we make it more robust.
+    await driver.wait(until.elementIsVisible(By.id("login-btn")), 10000); // Wait for the button to be visible by its locator
     await driver.wait(until.elementIsEnabled(loginButton), 10000); // Wait for the button to be enabled
     await loginButton.click();
     console.log("Clicked 'Log In' button.");
