@@ -21,12 +21,26 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", function () {
   beforeEach(async function () {
     // I'll use the very first browser setting from my 'browserstack.config.js' file.
     // So, it will open Chrome on Windows 10 for this test example.
+    //Check if credentials exist before starting
+    if (
+      !process.env.BROWSERSTACK_USERNAME ||
+      !process.env.BROWSERSTACK_ACCESS_KEY
+    ) {
+      throw new Error("Missing BrowserStack credentials!");
+    }
+
     const capability = capabilities[0];
     // This is where I tell Selenium to build and start the web browser.
     // I connect to BrowserStack's cloud server.
     driver = new Builder()
       .usingServer("https://hub-cloud.browserstack.com/wd/hub")
-      .withCapabilities(capability) // I use my chosen browser settings
+      // Explicitly pass credentials for clarity
+      .withCapabilities({
+        ...capability,
+        "browserstack.user": process.env.BROWSERSTACK_USERNAME,
+        "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
+      })
+      // I use my chosen browser settings
       .build(); // I make the browser driver ready
 
     // I tell the browser to go to the website I want to test.

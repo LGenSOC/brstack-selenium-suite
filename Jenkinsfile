@@ -30,30 +30,30 @@ pipeline {
             }
         }
 
-        // --- Stage 3: Run My Tests ---
+// --- Stage 3: Run My Tests ---
         stage('Run Tests on BrowserStack') {
             steps {
                 // Let's confirm it's there with the correct casing
                 sh 'ls -la Tests/'
 
-                 // Added withCredentials block to handle username/password credential
-                // This block securely retrieves and exposes the BrowserStack username and access key
-                // as environment variables for the commands within this block.
-                // 'browserstack-auth' should be the ID of your 'Username with password' credential in Jenkins.
-                withCredentials([usernamePassword(credentialsId: 'browserstack-auth', usernameVariable: 'BS_USERNAME', passwordVariable: 'BS_ACCESS_KEY')]) {
-                    // I'm adding these console.log statements to check what Node.js actually sees for my credentials.
-                    // Jenkins will mask the actual values in the logs for security.
-                    sh 'echo "BROWSERSTACK_USERNAME: $BS_USERNAME"' // <--- CHANGE: Variable name changed to BS_USERNAME
-                    sh 'echo "BROWSERSTACK_ACCESS_KEY: $BS_ACCESS_KEY"' // <--- CHANGE: Variable name changed to BS_ACCESS_KEY
-                    sh 'curl -v https://hub-cloud.browserstack.com/wd/hub' // I'm checking if my Jenkins server can connect to the BrowserStack hub.
+                // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                // NEW: Securely inject BrowserStack credentials from Jenkins vault
+                withCredentials([usernamePassword(
+                    credentialsId: 'browserstack-auth', // Must match your Jenkins credential ID
+                    usernameVariable: 'BROWSERSTACK_USERNAME', 
+                    passwordVariable: 'BROWSERSTACK_ACCESS_KEY'
+                )]) {
+                    // DEBUG: Verify credentials are loaded (masked in logs)
+                    sh 'echo "Jenkins injected BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME"'
+                    sh 'echo "Jenkins injected BROWSERSTACK_ACCESS_KEY length: ${#BROWSERSTACK_ACCESS_KEY} chars"'
 
-                    // Now run Mocha, passing the credentials explicitly via cross-env
-                    // Note the variable names are now BS_USERNAME and BS_ACCESS_KEY
-                    sh 'npx cross-env BROWSERSTACK_USERNAME=$BS_USERNAME BROWSERSTACK_ACCESS_KEY=$BS_ACCESS_KEY npx mocha Tests/loginFavoriteSamsung.test.js' // <--- CHANGE: Variable names changed to BS_USERNAME and BS_ACCESS_KEY
-                } 
+                    // Original test command now uses Jenkins-provided credentials
+                    sh 'npx cross-env BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY npx mocha Tests/loginFavoriteSamsung.test.js'
+                }
+                // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            }
         }
     }
-     }
 
     // This section runs after all stages, for cleanup.
     post {
