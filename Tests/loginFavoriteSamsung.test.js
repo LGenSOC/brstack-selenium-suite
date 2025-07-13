@@ -2,34 +2,21 @@
 // find things on a page (By), press special keys (Key), and wait for things (until).
 // Note: 'Key' is not used in this test, but kept for completeness if needed elsewhere.
 const { Builder, By, Key, until } = require("selenium-webdriver");
-// I bring in 'Chai', which helps me check if my tests pass or fail.
-// === CHANGE: REMOVED CHAI REQUIREMENT ===
 // I no longer need to require 'Chai' because Jest has its own powerful 'expect' assertion library built-in.
-// const { expect } = require("chai"); // Original Chai line - REMOVED
-// =======================================
 
 // I get my browser settings (like Chrome, Firefox, or Samsung phone)
 // from the 'browserstack.config.js' file that I just set up.
 const { capabilities } = require("../browserstack.config");
 
-// Jest's globals (describe, test, beforeEach, afterEach, expect) are typically
-// available automatically without require, but explicit import is good practice
-// especially if you're using TypeScript or a specific Jest setup.
-// If you've included "@jest/globals" in devDependencies, these are automatically available.
 // 'describe' is like a big box for all related tests.
 // I'm giving my test suite a name: "Bstackdemo Login and Samsung Galaxy S20+ Favorite Test".
-// === CHANGE: CONVERTED TO ARROW FUNCTION for 'describe' ===
 describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
-  // ==========================================================
-
   // This variable will hold my web browser driver, which is what controls the browser.
   let driver;
 
   // 'beforeEach' means "I do this code before *every* single test starts."
   // It's good for setting up my browser and going to the website each time.
-  // === CHANGE: CONVERTED TO ARROW FUNCTION for 'beforeEach' and added timeout ===
   beforeEach(async () => {
-    // ==============================================================================
     // I verify my credentials are available before starting
     if (
       !process.env.BROWSERSTACK_USERNAME ||
@@ -57,9 +44,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
   }, 60000); // Set timeout for beforeEach hook (60 seconds)
 
   // 'afterEach' means "I do this code after *every* single test finishes."
-  // === CHANGE: CONVERTED TO ARROW FUNCTION for 'afterEach' and added timeout ===
   afterEach(async () => {
-    // =============================================================================
     if (driver) {
       // If the browser is open, I close it cleanly.
       await driver.quit();
@@ -67,9 +52,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
   }, 60000); // Set timeout for afterEach hook (60 seconds)
 
   // 'it' is one single test. I give it a clear name about what it should do.
-  // === CHANGE: 'it' changed to 'test' and converted to ARROW FUNCTION; added test timeout ===
   test("should log in, filter Samsung, favorite Galaxy S20+, and verify on favorites page", async () => {
-    // =========================================================================================
     // --- Step 1: Log into www.bstackdemo.com ---
 
     // I find the username input field by first locating its parent div by ID,
@@ -90,48 +73,47 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       until.elementLocated(By.id("password")),
       15000
     );
-
     const passField = await passwordParentDiv.findElement(
       By.css('input[type="text"]')
     );
     await passField.sendKeys("testingisfun99");
     console.log("Entered password.");
 
-    // === NEW ADDITION: Wait for any potential loading overlay/spinner to disappear BEFORE clicking login ===
-    // The ElementClickInterceptedError indicates something is covering the button.
-    // This is often a spinner or a transparent overlay during form submission or page transition.
-    // Using until.stalenessOf with a common spinner/overlay selector is a robust way to handle this.
+    // === NEW ROBUST WAIT FOR OVERLAYS TO DISAPPEAR ===
+    // This looks for common overlay patterns that might intercept clicks
+    // and waits for them to become stale.
     try {
-      const spinner = await driver.findElement(By.css(".spinner")); // Attempt to find a spinner/overlay
-      await driver.wait(until.stalenessOf(spinner), 10000); // Wait for it to disappear
-      console.log("Waited for pre-login spinner/overlay to disappear.");
-    } catch (e) {
-      // If spinner is not found immediately, it might mean it never appeared or already disappeared.
-      // This is not a critical error, just log it.
+      // Attempt to find any potential full-page overlay or loader.
+      // We'll prioritize the specific class if it consistently appears, but
+      // also include generic loader/spinner/overlay selectors.
+      const potentialOverlay = await driver.findElement(
+        By.css(
+          'div[class*="css-"], div.ReactModal__Overlay, .loader, .spinner, [aria-busy="true"]'
+        )
+      );
+      // Wait for the found overlay to become stale (disappear from DOM)
+      await driver.wait(until.stalenessOf(potentialOverlay), 10000);
       console.log(
-        "No pre-login spinner/overlay found or it disappeared quickly:",
+        "Waited for potential intercepting overlay/loader to disappear."
+      );
+    } catch (e) {
+      // Log if no such overlay was found, or if it disappeared before we could find it.
+      // This is expected if the site is very fast or the overlay is not consistently present,
+      // so it's not a critical error.
+      console.log(
+        "No common intercepting overlay found or it disappeared quickly:",
         e.message
       );
     }
-    // ======================================================================================================
+    // =================================================
 
     // Now, I find the "Log In" button by its ID and click it to submit the form.
+    // This condition waits for the element to be present, visible, enabled, AND not obscured.
     const loginButton = await driver.wait(
-      until.elementLocated(By.id("login-btn")), // First, ensure the button is in the DOM
-      15000
+      until.elementToBeClickable(By.id("login-btn")),
+      15000 // Keep a generous timeout for this critical step
     );
 
-    // Wait until the button is visible and then enabled
-    // This custom wait ensures the element is ready for interaction.
-    await driver.wait(
-      async () => {
-        return await loginButton.isDisplayed();
-      },
-      10000,
-      "Login button not visible within 10 seconds"
-    ); // Wait for the button to be visible
-
-    await driver.wait(until.elementIsEnabled(loginButton), 10000); // Wait for the button to be enabled
     await loginButton.click();
     console.log("Clicked 'Log In' button.");
 
@@ -144,10 +126,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // I find the element that shows the username.
     const usernameElement = await driver.findElement(By.css(".username"));
     // I check if the text of that element actually includes "demouser".
-    // === CHANGE: ASSERTION SYNTAX - 'to.include' changed to 'toContain' (Jest syntax) ===
     expect(await usernameElement.getText()).toContain("demouser");
-    // ==================================================================================
     console.log("Login verified: 'demouser' text found.");
+
     // --- Step 2: Filter the products to show "Samsung" devices only ---
 
     // I click on the sorting/filtering dropdown menu.
@@ -171,10 +152,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     const firstProductName = await productNames[0].getText();
     // I expect the first product name to include "Samsung".
-    // === CHANGE: ASSERTION SYNTAX - 'to.include' changed to 'toContain' (Jest syntax) ===
     expect(firstProductName).toContain("Samsung");
-    // ==================================================================================
     console.log("Verified: First product displayed is a Samsung device.");
+
     // --- Step 3: Favorite the "Galaxy S20+" device ---
 
     // I find the text "Galaxy S20+" on the page.
@@ -195,10 +175,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     const favoritesCount = await favoritesCountElement.getText();
     // I expect the favorites count to now show "1".
-
     expect(favoritesCount).toBe("1");
-
     console.log("Favorites count updated to 1.");
+
     // --- Step 4: Verify that the Galaxy S20+ is listed on the Favorites page ---
 
     // I find the "Favorites" link on the page by its ID and click it to go to the favorites page.
@@ -215,9 +194,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     const favoriteProductName = await favoriteProductNameElement.getText();
     // I check if that product name includes "Galaxy S20+".
-
     expect(favoriteProductName).toContain("Galaxy S20+");
-
     console.log("Verified: 'Galaxy S20+' is listed on the Favorites page.");
 
     // If all checks pass, I can say the test passed!
