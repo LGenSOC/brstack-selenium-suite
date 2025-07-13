@@ -19,41 +19,38 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", function () {
   // 'beforeEach' means "I do this code before *every* single test starts."
   // It's good for setting up my browser and going to the website each time.
   beforeEach(async function () {
-    // I'll use the very first browser setting from my 'browserstack.config.js' file.
-    // So, it will open Chrome on Windows 10 for this test example.
-    //Check if credentials exist before starting
+    // I verify my credentials are available before starting
     if (
       !process.env.BROWSERSTACK_USERNAME ||
       !process.env.BROWSERSTACK_ACCESS_KEY
     ) {
-      throw new Error("Missing BrowserStack credentials!");
+      throw new Error("BrowserStack credentials missing! Check Jenkins setup");
     }
 
-    const capability = capabilities[0];
-    // This is where I tell Selenium to build and start the web browser.
-    // I connect to BrowserStack's cloud server.
+    const capability = {
+      ...capabilities[0],
+      // I explicitly set credentials to ensure they're fresh
+      "browserstack.user": process.env.BROWSERSTACK_USERNAME,
+      "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
+    };
+    // I build the driver with credentials in both URL and capabilities
     driver = new Builder()
-      .usingServer("https://hub-cloud.browserstack.com/wd/hub")
-      // Explicitly pass credentials for clarity
-      .withCapabilities({
-        ...capability,
-        "browserstack.user": process.env.BROWSERSTACK_USERNAME,
-        "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
-      })
-      // I use my chosen browser settings
-      .build(); // I make the browser driver ready
+      .usingServer(
+        `https://${process.env.BROWSERSTACK_USERNAME}:${process.env.BROWSERSTACK_ACCESS_KEY}@hub-cloud.browserstack.com/wd/hub`
+      )
+      .withCapabilities(capability)
+      .build();
 
-    // I tell the browser to go to the website I want to test.
     await driver.get("https://www.bstackdemo.com");
   });
-  //'afterEach' means "I do this code after *every* single test finishes."
-  // It's very important to close the browser after each test is done.
+
   afterEach(async function () {
     if (driver) {
       // If the browser is open, I close it cleanly.
       await driver.quit();
     }
   });
+
   // 'it' is one single test. I give it a clear name about what it should do.
   it("should log in, filter Samsung, favorite Galaxy S20+, and verify on favorites page", async function () {
     // --- Step 1: Log into www.bstackdemo.com ---

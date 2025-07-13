@@ -51,3 +51,4 @@ capabilities.push({
 module.exports = {
   capabilities,
 };
+// the end

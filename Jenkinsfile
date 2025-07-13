@@ -3,10 +3,6 @@ pipeline {
     // Jenkins can use any available computer to run my pipeline steps.
     agent any
 
-    // Removed direct definition of BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY here.
-    // This environment block is now empty or can be used for other non-credential environment variables.
-
-
     // These are the main parts (stages) of my pipeline.
     stages {
         // --- Stage 1: Get My Code ---
@@ -30,13 +26,33 @@ pipeline {
             }
         }
 
-// --- Stage 3: Run My Tests ---
+        // NEW STAGE: Verify BrowserStack Connection (Added for debugging)
+        stage('Verify BrowserStack Auth') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'browserstack-auth',
+                    usernameVariable: 'BROWSERSTACK_USERNAME',
+                    passwordVariable: 'BROWSERSTACK_ACCESS_KEY'
+                )]) {
+                    sh '''
+                        echo "=== Testing BrowserStack Credentials ==="
+                        echo "Username: $BROWSERSTACK_USERNAME"
+                        echo "Access Key Length: ${#BROWSERSTACK_ACCESS_KEY} chars"
+                        
+                        # This will fail immediately if credentials are wrong
+                        curl -u "$BROWSERSTACK_USERNAME:$BROWSERSTACK_ACCESS_KEY" \
+                        https://api.browserstack.com/automate/plan.json
+                    '''
+                }
+            }
+        }
+
+        // --- Stage 3: Run My Tests ---
         stage('Run Tests on BrowserStack') {
             steps {
                 // Let's confirm it's there with the correct casing
                 sh 'ls -la Tests/'
 
-                // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 // NEW: Securely inject BrowserStack credentials from Jenkins vault
                 withCredentials([usernamePassword(
                     credentialsId: 'browserstack-auth', // Must match your Jenkins credential ID
@@ -50,7 +66,6 @@ pipeline {
                     // Original test command now uses Jenkins-provided credentials
                     sh 'npx cross-env BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY npx mocha Tests/loginFavoriteSamsung.test.js'
                 }
-                // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             }
         }
     }
