@@ -90,11 +90,30 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       until.elementLocated(By.id("password")),
       15000
     );
+
     const passField = await passwordParentDiv.findElement(
       By.css('input[type="text"]')
     );
     await passField.sendKeys("testingisfun99");
     console.log("Entered password.");
+
+    // === NEW ADDITION: Wait for any potential loading overlay/spinner to disappear BEFORE clicking login ===
+    // The ElementClickInterceptedError indicates something is covering the button.
+    // This is often a spinner or a transparent overlay during form submission or page transition.
+    // Using until.stalenessOf with a common spinner/overlay selector is a robust way to handle this.
+    try {
+      const spinner = await driver.findElement(By.css(".spinner")); // Attempt to find a spinner/overlay
+      await driver.wait(until.stalenessOf(spinner), 10000); // Wait for it to disappear
+      console.log("Waited for pre-login spinner/overlay to disappear.");
+    } catch (e) {
+      // If spinner is not found immediately, it might mean it never appeared or already disappeared.
+      // This is not a critical error, just log it.
+      console.log(
+        "No pre-login spinner/overlay found or it disappeared quickly:",
+        e.message
+      );
+    }
+    // ======================================================================================================
 
     // Now, I find the "Log In" button by its ID and click it to submit the form.
     const loginButton = await driver.wait(
@@ -103,8 +122,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
 
     // Wait until the button is visible and then enabled
-    // === ADJUSTMENT: Explicitly wait for element.isDisplayed() on the located element ===
-    // This handles cases where until.elementIsVisible might not correctly apply isDisplayed.
+    // This custom wait ensures the element is ready for interaction.
     await driver.wait(
       async () => {
         return await loginButton.isDisplayed();
