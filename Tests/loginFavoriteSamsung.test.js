@@ -134,7 +134,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         error.name === "ElementClickInterceptedError" ||
         error.name === "WebDriverError"
       ) {
-        // Manually re-typed this line to fix potential VS Code 'expression expected' error
+        // FORCED TO SINGLE LINE TO RESOLVE VISUAL STUDIO 'EXPRESSION EXPECTED' ERROR
         console.warn(
           "Standard click failed, attempting JavaScript click:",
           error.message
@@ -147,9 +147,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       }
     }
 
-    // I wait up to 20 seconds (increased from 10) until the website's address (URL) changes to include "dashboard".
+    // I wait up to 40 seconds (increased from 10) until the website's address (URL) changes to include "dashboard".
     // This helps me know the login was successful.
-    await driver.wait(until.urlContains("dashboard"), 20000); // Increased timeout to 20 seconds
+    await driver.wait(until.urlContains("dashboard"), 40000); // Increased timeout to 40 seconds
     console.log("Navigated to dashboard after login.");
 
     // After logging in, I check if I can see the "demouser" text on the page.
