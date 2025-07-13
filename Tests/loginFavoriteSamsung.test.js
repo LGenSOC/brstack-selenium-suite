@@ -86,7 +86,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", function () {
       until.elementLocated(By.id("login-btn")),
       15000
     );
-    await driver.wait(until.elementToBeClickable(loginButton), 10000); // Wait up to 10 seconds for the button to be clickable
+    // Wait until the button is visible and then enabled
+    await driver.wait(until.visibilityOf(loginButton), 10000); // Wait for the button to be visible
+    await driver.wait(until.elementIsEnabled(loginButton), 10000); // Wait for the button to be enabled
     await loginButton.click();
     console.log("Clicked 'Log In' button.");
 
