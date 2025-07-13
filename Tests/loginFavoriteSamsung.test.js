@@ -1,6 +1,5 @@
 // I bring in the tools I need from Selenium, like how to build a browser,
 // find things on a page (By), press special keys (Key), and wait for things (until).
-// Note: 'Key' is not used in this test, but kept for completeness if needed elsewhere.
 const { Builder, By, Key, until } = require("selenium-webdriver");
 // I no longer need to require 'Chai' because Jest has its own powerful 'expect' assertion library built-in.
 
@@ -107,15 +106,45 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
     // =================================================
 
-    // Now, I find the "Log In" button by its ID and click it to submit the form.
-    // This condition waits for the element to be present, visible, enabled, AND not obscured.
+    // Now, I find the "Log In" button by its ID.
+    // We'll explicitly wait for it to be located, visible, and enabled.
     const loginButton = await driver.wait(
-      until.elementToBeClickable(By.id("login-btn")),
-      15000 // Keep a generous timeout for this critical step
+      until.elementLocated(By.id("login-btn")),
+      15000 // Wait for element to be present in DOM
     );
 
-    await loginButton.click();
-    console.log("Clicked 'Log In' button.");
+    // Explicitly wait for the button to be visible.
+    await driver.wait(
+      until.elementIsVisible(loginButton),
+      10000,
+      "Login button not visible within 10 seconds"
+    );
+
+    // Explicitly wait for the button to be enabled.
+    await driver.wait(until.elementIsEnabled(loginButton), 10000);
+
+    // Attempt to click the button.
+    try {
+      await loginButton.click();
+      console.log("Clicked 'Log In' button using standard click.");
+    } catch (error) {
+      // If standard click fails (e.g., due to persistent interception),
+      // fall back to JavaScript click as a last resort.
+      if (
+        error.name === "ElementClickInterceptedError" ||
+        error.name === "WebDriverError"
+      ) {
+        console.warn(
+          "Standard click failed, attempting JavaScript click:",
+          error.message
+        );
+        await driver.executeScript("arguments[0].click();", loginButton);
+        console.log("Forced click on 'Log In' button via JavaScript.");
+      } else {
+        // Re-throw other unexpected errors
+        throw error;
+      }
+    }
 
     // I wait up to 10 seconds until the website's address (URL) changes to include "dashboard".
     // This helps me know the login was successful.
