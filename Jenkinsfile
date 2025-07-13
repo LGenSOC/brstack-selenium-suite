@@ -21,6 +21,10 @@ pipeline {
                 // Let's see where Jenkins is and what files are here!
                 sh 'pwd'
                 sh 'ls -la' // List all files and directories in the current working directory
+                sh 'rm -rf node_modules'          // Delete the entire node_modules folder
+                sh 'rm -f package-lock.json'     // Delete package-lock.json
+                sh 'npm cache clean --force' 
+
                 // I run 'npm install' to get all the necessary Node.js packages.
                 sh 'npm install'
             }
