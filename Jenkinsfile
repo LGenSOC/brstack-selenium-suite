@@ -68,7 +68,7 @@ pipeline {
                     sh 'echo "Jenkins injected BROWSERSTACK_ACCESS_KEY length: ${#BROWSERSTACK_ACCESS_KEY} chars"'
 
                     // Original test command now uses Jenkins-provided credentials
-                    sh 'npx cross-env BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY npx mocha Tests/loginFavoriteSamsung.test.js'
+                    sh 'npx cross-env BROWSERSTACK_USERNAME=$BROWSERSTACK_USERNAME BROWSERSTACK_ACCESS_KEY=$BROWSERSTACK_ACCESS_KEY npm test'
                 }
             }
         }

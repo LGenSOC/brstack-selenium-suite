@@ -6,7 +6,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "mocha Tests/loginFavoriteSamsung.test.js"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,8 @@
   "devDependencies": {
     "chai": "^5.2.0",
     "dotenv": "^17.0.1",
-    "mocha": "^11.7.1",
+    "jest": "^30.0.4",
+    "@jest/globals": "^30.0.4",
     "selenium-webdriver": "^4.34.0"
   }
 }
