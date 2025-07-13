@@ -41,7 +41,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", function () {
       .withCapabilities(capability)
       .build();
 
-    await driver.get("https://www.bstackdemo.com");
+    //go directly to the sign-in page to match the test flow.
+
+    await driver.get("https://www.bstackdemo.com/signin");
   });
 
   afterEach(async function () {
@@ -55,19 +57,38 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", function () {
   it("should log in, filter Samsung, favorite Galaxy S20+, and verify on favorites page", async function () {
     // --- Step 1: Log into www.bstackdemo.com ---
 
-    // First, I find the "Sign In" button on the page by its ID and click it.
-    await driver.findElement(By.id("signin")).click();
-    console.log("Clicked 'Sign In' button.");
-    // Now, I find the username input field and type "demouser" into it.
-    await driver.findElement(By.css("#username input")).sendKeys("demouser");
+    // I find the username input field by first locating its parent div by ID,
+    // and then finding the 'input' element within that div.
+    const usernameParentDiv = await driver.wait(
+      until.elementLocated(By.id("username")),
+      15000
+    );
+    const userField = await usernameParentDiv.findElement(
+      By.css('input[type="text"]')
+    );
+    await userField.sendKeys("demouser");
     console.log("Entered username.");
 
-    // I find the password input field, type "testingisfun99" into it,
-    // and then press the ENTER key to submit the login form.
-    await driver
-      .findElement(By.css("#password input"))
-      .sendKeys("testingisfun99", Key.RETURN);
-    console.log("Entered password and pressed Enter.");
+    // I find the password input field similarly, by locating its parent div by ID,
+    // and then finding the 'input' element within that div.
+    const passwordParentDiv = await driver.wait(
+      until.elementLocated(By.id("password")),
+      15000
+    );
+    const passField = await passwordParentDiv.findElement(
+      By.css('input[type="text"]')
+    );
+    await passField.sendKeys("testingisfun99");
+    console.log("Entered password.");
+
+    // Now, I find the "Log In" button by its ID and click it to submit the form.
+    const loginButton = await driver.wait(
+      until.elementLocated(By.id("login-btn")),
+      15000
+    );
+    await loginButton.click();
+    console.log("Clicked 'Log In' button.");
+
     // I wait up to 10 seconds until the website's address (URL) changes to include "dashboard".
     // This helps me know the login was successful.
     await driver.wait(until.urlContains("dashboard"), 10000);
