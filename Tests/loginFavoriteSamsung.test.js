@@ -101,11 +101,18 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       until.elementLocated(By.id("login-btn")), // First, ensure the button is in the DOM
       15000
     );
+
     // Wait until the button is visible and then enabled
-    // === ADJUSTMENT: Using until.elementIsVisible to confirm visibility of the LOCATED element ===
-    // The previous until.visibilityOf(loginButton) might be encountering an issue with the WebElement object itself.
-    // By re-locating or ensuring visibility by ID, we make it more robust.
-    await driver.wait(until.elementIsVisible(By.id("login-btn")), 10000); // Wait for the button to be visible by its locator
+    // === ADJUSTMENT: Explicitly wait for element.isDisplayed() on the located element ===
+    // This handles cases where until.elementIsVisible might not correctly apply isDisplayed.
+    await driver.wait(
+      async () => {
+        return await loginButton.isDisplayed();
+      },
+      10000,
+      "Login button not visible within 10 seconds"
+    ); // Wait for the button to be visible
+
     await driver.wait(until.elementIsEnabled(loginButton), 10000); // Wait for the button to be enabled
     await loginButton.click();
     console.log("Clicked 'Log In' button.");
