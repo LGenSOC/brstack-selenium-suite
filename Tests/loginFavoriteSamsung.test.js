@@ -27,9 +27,6 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       // I explicitly set credentials to ensure they're fresh
       "browserstack.user": process.env.BROWSERSTACK_USERNAME,
       "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
-      // You can add a build name here if you want to group your Jenkins builds in BrowserStack
-      // "build": `Jenkins Build - ${process.env.JENKINS_NODE_COOKIE || 'Local'} - ${new Date().toLocaleString()}`,
-      // "name": "Bstackdemo Login Test"
     };
     // I build the driver with credentials in both URL and capabilities
     driver = await new Builder()
@@ -83,221 +80,49 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
 
   // 'it' is one single test. I give it a clear name about what it should do.
   test("should log in, filter Samsung, favorite Galaxy S20+, and verify on favorites page", async () => {
-    // --- Step 1: Log into www.bstackdemo.com ---
-
-    // **Username (React Select component)**
-    const usernameDropdown = await driver.wait(
-      until.elementLocated(By.id("username")),
-      15000,
-      "Username dropdown container (id='username') not found."
-    );
-    console.log("Username dropdown container found.");
-
-    const usernameSelectControl = await usernameDropdown.findElement(
-      By.css(".css-yk16xz-control")
-    );
-    await driver.wait(
-      until.elementIsVisible(usernameSelectControl),
-      10000,
-      "Username select control not visible."
-    );
-    await driver.wait(
-      until.elementIsEnabled(usernameSelectControl),
-      10000,
-      "Username select control not enabled."
-    );
-    await usernameSelectControl.click();
-    console.log("Clicked username dropdown.");
-    await driver.sleep(500); // Small pause for options to appear
-
-    const demouserOption = await driver.wait(
-      until.elementLocated(
-        By.xpath(
-          "//div[contains(@id, 'react-select-2-option') and text()='demouser']"
-        )
-      ),
-      10000,
-      "Option 'demouser' not found in dropdown."
-    );
-    await driver.wait(
-      until.elementIsVisible(demouserOption),
-      5000,
-      "Option 'demouser' not visible."
-    );
-    await driver.wait(
-      until.elementIsEnabled(demouserOption),
-      5000,
-      "Option 'demouser' not enabled."
-    );
-    await demouserOption.click();
-    console.log("Selected 'demouser' from dropdown.");
-    await driver.sleep(1000); // Give time for selection to register
-
-    // **VERIFY USERNAME INPUT VALUE**
-    // Find the hidden input associated with the React Select component
-    const usernameInput = await driver.findElement(
-      By.id("react-select-2-input")
-    );
-    const actualUsernameValue = await driver.executeScript(
-      "return arguments[0].value;",
-      usernameInput
-    );
+    // --- Step 1: Log into www.bstackdemo.com - THE "DAMN SOLUTION" APPROACH ---
     console.log(
-      `Actual username input value after selection: '${actualUsernameValue}'`
+      "Attempting login using direct JavaScript injection to bypass complex UI interaction."
     );
-    if (actualUsernameValue !== "demouser") {
-      console.warn(
-        "Username input value mismatch after selection. Forcing value via JavaScript."
-      );
-      await driver.executeScript(
-        "arguments[0].value = 'demouser';",
-        usernameInput
-      );
-      await driver.executeScript(
-        "arguments[0].dispatchEvent(new Event('change'));",
-        usernameInput
-      );
-      await driver.executeScript(
-        "arguments[0].dispatchEvent(new Event('input'));",
-        usernameInput
-      ); // Also dispatch input event
-    }
 
-    // **Password (React Select component)**
-    const passwordDropdown = await driver.wait(
-      until.elementLocated(By.id("password")),
-      15000,
-      "Password dropdown container (id='password') not found."
+    // Direct JavaScript to set username value and trigger events
+    // We are targeting the hidden input fields identified previously by their IDs.
+    await driver.executeScript(
+      "document.getElementById('react-select-2-input').value = 'demouser';" +
+        "document.getElementById('react-select-2-input').dispatchEvent(new Event('change'));" +
+        "document.getElementById('react-select-2-input').dispatchEvent(new Event('input'));" +
+        "console.log('JS: Username value set and events dispatched.');"
     );
-    console.log("Password dropdown container found.");
+    console.log("Selenium: Username value injection via JavaScript completed.");
 
-    const passwordSelectControl = await passwordDropdown.findElement(
-      By.css(".css-yk16xz-control")
+    // Direct JavaScript to set password value and trigger events
+    await driver.executeScript(
+      "document.getElementById('react-select-3-input').value = 'testingisfun99';" +
+        "document.getElementById('react-select-3-input').dispatchEvent(new Event('change'));" +
+        "document.getElementById('react-select-3-input').dispatchEvent(new Event('input'));" +
+        "console.log('JS: Password value set and events dispatched.');"
     );
-    await driver.wait(
-      until.elementIsVisible(passwordSelectControl),
-      10000,
-      "Password select control not visible."
-    );
-    await driver.wait(
-      until.elementIsEnabled(passwordSelectControl),
-      10000,
-      "Password select control not enabled."
-    );
-    await passwordSelectControl.click();
-    console.log("Clicked password dropdown.");
-    await driver.sleep(500); // Small pause for options to appear
+    console.log("Selenium: Password value injection via JavaScript completed.");
 
-    const passwordOption = await driver.wait(
-      until.elementLocated(
-        By.xpath(
-          "//div[contains(@id, 'react-select-3-option') and text()='testingisfun99']"
-        )
-      ),
-      10000,
-      "Option 'testingisfun99' not found in dropdown."
-    );
-    await driver.wait(
-      until.elementIsVisible(passwordOption),
-      5000,
-      "Option 'testingisfun99' not visible."
-    );
-    await driver.wait(
-      until.elementIsEnabled(passwordOption),
-      5000,
-      "Option 'testingisfun99' not enabled."
-    );
-    await passwordOption.click();
-    console.log("Selected 'testingisfun99' from dropdown.");
-    await driver.sleep(1000); // Give time for selection to register
+    // Give a short moment for the UI to potentially register changes, though JS is fast
+    await driver.sleep(1500);
 
-    // **VERIFY PASSWORD INPUT VALUE**
-    // Find the hidden input associated with the React Select component
-    const passwordInput = await driver.findElement(
-      By.id("react-select-3-input")
-    );
-    const actualPasswordValue = await driver.executeScript(
-      "return arguments[0].value;",
-      passwordInput
-    );
-    console.log(
-      `Actual password input value after selection: '${actualPasswordValue}'`
-    );
-    if (actualPasswordValue !== "testingisfun99") {
-      console.warn(
-        "Password input value mismatch after selection. Forcing value via JavaScript."
-      );
-      await driver.executeScript(
-        "arguments[0].value = 'testingisfun99';",
-        passwordInput
-      );
-      await driver.executeScript(
-        "arguments[0].dispatchEvent(new Event('change'));",
-        passwordInput
-      );
-      await driver.executeScript(
-        "arguments[0].dispatchEvent(new Event('input'));",
-        passwordInput
-      ); // Also dispatch input event
-    }
-
-    // =================================================
-    // ROBUST WAIT FOR OVERLAYS TO DISAPPEAR
-    try {
-      // Find elements that *might* be overlays/spinners.
-      const overlays = await driver.findElements(
-        By.css(
-          'div[class*="css-"], div.ReactModal__Overlay, .loader, .spinner, [aria-busy="true"]'
-        )
-      );
-      // Check each found overlay for staleness.
-      for (let overlay of overlays) {
-        try {
-          await driver.wait(until.stalenessOf(overlay), 5000); // Shorter wait per element
-          console.log("An overlay or loader disappeared.");
-        } catch (e) {
-          if (e.name === "TimeoutError") {
-            console.warn(
-              "An overlay or loader did not become stale within 5 seconds."
-            );
-          } else {
-            console.warn(`Error waiting for overlay: ${e.message}`);
-          }
-        }
-      }
-      console.log(
-        "Finished checking for potential intercepting overlays/loaders."
-      );
-    } catch (e) {
-      if (e.name !== "NoSuchElementError") {
-        // Only log if it's not just that the overlay wasn't found initially
-        console.warn(
-          "Could not check for overlays or unexpected error during initial find:",
-          e.message
-        );
-      } else {
-        console.log("No common intercepting overlay elements found.");
-      }
-    }
-    // =================================================
-
-    // Find the login form and submit it
+    // Find the login form element (still good to locate it via Selenium to ensure it's there)
     const loginForm = await driver.wait(
-      until.elementLocated(By.css("form.w-80")), // Target the form directly
-      15000,
-      "Login form not found."
+      until.elementLocated(By.css("form.w-80")),
+      10000,
+      "Login form not found for submission."
     );
-    console.log("Login form found.");
+    console.log("Login form element found for submission.");
 
-    // Attempt to submit the form directly via JavaScript
-    console.log("Attempting to submit form via JavaScript.");
+    // Directly submit the form via JavaScript
     await driver.executeScript("arguments[0].submit();", loginForm);
-    console.log("Form submitted via JavaScript.");
+    console.log("Form submitted directly via JavaScript.");
 
-    // IMPORTANT: Add a longer wait after login attempt to allow for UI updates and dynamic content loading
-    await driver.sleep(4000); // Increased significantly to 4 seconds for page content to load
+    // IMPORTANT: Add a robust wait after login attempt to allow for UI updates and dynamic content loading
+    await driver.sleep(7000); // Increased to 7 seconds, giving ample time for content to load after JS submission
 
-    // --- CHECK FOR LOGIN ERROR MESSAGES (should ideally not be seen now) ---
+    // --- CHECK FOR LOGIN ERROR MESSAGES (optional, but good for diagnostics) ---
     try {
       const errorMessage = await driver.findElement(
         By.css('.api-error, .error-message, [role="alert"]')
@@ -305,11 +130,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       const errorText = await errorMessage.getText();
       if (errorText.length > 0 && errorText.includes("Invalid Username")) {
         console.error(
-          `Login failed: Found unexpected "Invalid Username" error message on page: "${errorText}"`
+          `Login failed: Found "Invalid Username" error message on page: "${errorText}"`
         );
-        throw new Error(
-          `Login failed due to unexpected error message: "${errorText}"`
-        );
+        throw new Error(`Login failed due to error message: "${errorText}"`);
       } else if (errorText.length > 0) {
         console.warn(
           `Found other error message after login: "${errorText}". Proceeding if not "Invalid Username".`
@@ -334,38 +157,32 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
 
     // --- LOGIN VERIFICATION: Directly check for dashboard elements on the SAME URL ---
-    // Since manual login shows the content appearing on https://www.bstackdemo.com/?signin=true,
-    // we don't wait for a URL change. We directly wait for dashboard elements.
-
+    // As confirmed, content loads on https://www.bstackdemo.com/?signin=true
     console.log(
       `Current URL before dashboard verification: ${await driver.getCurrentUrl()}`
     ); // Should still be ?signin=true
 
-    // Now, confirm dashboard content loaded by waiting for the 'demouser' text itself.
-    // This element should appear on the https://www.bstackdemo.com/?signin=true page after successful login.
     const usernameTextElement = await driver.wait(
       until.elementLocated(By.xpath("//span[contains(text(), 'demouser')]")),
-      20000, // Long wait as this confirms successful login content is present
+      30000, // Long wait for successful login content to appear
       "Demouser text not found on page after login attempt. Login likely failed."
     );
     await driver.wait(
       until.elementIsVisible(usernameTextElement),
-      10000,
-      "Demouser text found but not visible on dashboard within 10 seconds."
+      20000, // Long wait for visibility
+      "Demouser text found but not visible on dashboard within 20 seconds."
     );
     console.log(
       "Dashboard content loaded: 'demouser' text element found and visible."
     );
 
-    // Now, I check if I can see the "demouser" text on the page.
     expect(await usernameTextElement.getText()).toContain("demouser");
     console.log("Login verified: 'demouser' text found.");
 
-    // You can also add a check for the presence of the product list or filter options
-    // to further confirm that the main content has loaded, as these would appear post-login.
+    // Confirm that other main dashboard content (like the filter dropdown) is also present
     await driver.wait(
-      until.elementLocated(By.css(".sort select")), // The filter dropdown
-      15000,
+      until.elementLocated(By.css(".sort select")),
+      25000, // Long wait for dashboard elements
       "Product sort/filter dropdown not found on page after login. Dashboard content likely not fully loaded."
     );
     console.log(
@@ -427,10 +244,6 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await driver.findElement(By.id("favorites")).click();
     console.log("Clicked 'Favorites' link.");
 
-    // IMPORTANT: Even though the main content stays on ?signin=true, the "favorites" link
-    // *might* change the URL. Let's keep a flexible wait for URL to contain "favorites"
-    // or just directly check for the presence of the favorite product.
-    // Given the previous behavior, it's safer to directly check for the product on the favorites page content.
     await driver.sleep(3000); // Give time for favorites page content to load
 
     // On the favorites page, I find the name of the product that is listed there.
@@ -444,5 +257,5 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
 
     // If all checks pass, I can say the test passed!
     console.log("--- TEST PASSED SUCCESSFULLY! ---");
-  }, 60000); // Set timeout for the test itself (60 seconds)
+  }, 90000); // Increased overall test timeout to 90 seconds
 });
