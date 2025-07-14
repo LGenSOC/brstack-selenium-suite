@@ -181,12 +181,12 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       }
     }
 
-    // Wait for the URL to change to the dashboard URL, indicating successful login and navigation
+    // Wait for the URL to change to the exact dashboard URL, indicating successful login and navigation
     try {
       await driver.wait(
-        until.urlContains("https://www.bstackdemo.com/"),
+        until.urlIs("https://www.bstackdemo.com/"),
         20000,
-        "Did not navigate to dashboard after login button click."
+        "Did not navigate to main dashboard URL (https://www.bstackdemo.com/) after login button click."
       );
       console.log(
         `Successfully navigated to dashboard. Current URL: ${await driver.getCurrentUrl()}`
@@ -194,6 +194,13 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     } catch (e) {
       console.error(`Error navigating after login: ${e.message}`);
       console.log(`Current URL still: ${await driver.getCurrentUrl()}`);
+      // If we are still on the signin page, it means the login itself failed to redirect.
+      // Let's get the page source for debugging if we're stuck here.
+      const pageSource = await driver.getPageSource();
+      console.log(
+        "Page source if stuck on signin page:",
+        pageSource.substring(0, 500)
+      ); // Log first 500 chars
       throw e; // Re-throw to fail the test if navigation doesn't occur
     }
 
