@@ -140,46 +140,27 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
     // =================================================
 
-    // --- RE-INTRODUCE AND ENHANCE THE LOGIN BUTTON CLICK ---
-    // Now, I find the "Log In" button by its ID.
+    // --- SUBMIT THE LOGIN FORM DIRECTLY ---
+    // Locate the login button first to ensure it's on the page
     const loginButton = await driver.wait(
-      until.elementLocated(By.id("login-btn")), // Wait for the element to be present in the DOM
+      until.elementLocated(By.id("login-btn")),
       15000,
       "Login button not found within 15 seconds."
     );
-    await driver.wait(
-      until.elementIsVisible(loginButton), // Wait for the element to be visible
-      10000,
-      "Login button not visible within 10 seconds."
-    );
-    await driver.wait(
-      until.elementIsEnabled(loginButton), // Wait for the element to be enabled
-      10000,
-      "Login button not enabled within 10 seconds."
-    );
-    console.log("Login button found and clickable.");
 
-    // Attempt to click the button, with JavaScript fallback
-    try {
-      await loginButton.click();
-      console.log("Clicked 'Log In' button using standard click.");
-    } catch (error) {
-      // If standard click fails (e.g., due to persistent interception),
-      // fall back to JavaScript click as a last resort.
-      if (
-        error.name === "ElementClickInterceptedError" ||
-        error.name === "WebDriverError"
-      ) {
-        console.warn(
-          "Standard click failed (intercepted), attempting JavaScript click:",
-          error.message
-        );
-        await driver.executeScript("arguments[0].click();", loginButton);
-        console.log("Forced click on 'Log In' button via JavaScript.");
-      } else {
-        throw error; // Re-throw if it's another type of error
-      }
-    }
+    // Find the parent <form> element of the login button
+    // This assumes the login button is nested inside a <form> tag.
+    // If it's not directly inside, you might need to adjust the XPath,
+    // e.g., By.xpath("//form") if there's only one form, or By.id("login_form_id")
+    const loginForm = await loginButton.findElement(
+      By.xpath("./ancestor::form")
+    );
+    console.log("Found the login form element.");
+
+    // Instead of clicking the button, submit the form directly.
+    // This often triggers the form submission handler more reliably than clicking the button itself.
+    await loginForm.submit();
+    console.log("Submitted login form directly.");
 
     // Wait for the URL to change to the exact dashboard URL, indicating successful login and navigation
     try {
