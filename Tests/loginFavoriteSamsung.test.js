@@ -76,18 +76,18 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       "Username field not enabled."
     );
 
-    // *** Fix: Corrected username to 'locked_user' ***
+    // *** Using the correct 'demouser' username as you intended ***
     await driver.executeScript(
-      "arguments[0].value = 'locked_user';",
+      "arguments[0].value = 'demouser';", // Correct username: demouser
       userField
     );
-    console.log("Forced username value via JavaScript (now 'locked_user').");
+    console.log("Forced username value via JavaScript (now 'demouser').");
 
     // The explicit wait to confirm the value should still be useful as a double-check
     await driver.wait(
       async () => {
         const value = await userField.getAttribute("value");
-        return value === "locked_user"; // CORRECTED THIS LINE
+        return value === "demouser"; // Expecting demouser
       },
       15000,
       "Username did not persist in the field after JavaScript injection."
