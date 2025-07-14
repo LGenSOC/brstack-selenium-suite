@@ -163,6 +163,10 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     try {
       await loginButton.click();
       console.log("Clicked 'Log In' button using standard click.");
+      // *** ADDED: Log URL after successful click ***
+      console.log(
+        `Current URL after login click: ${await driver.getCurrentUrl()}`
+      );
     } catch (error) {
       // If standard click fails (e.g., due to persistent interception),
       // fall back to JavaScript click as a last resort.
@@ -176,6 +180,10 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         );
         await driver.executeScript("arguments[0].click();", loginButton);
         console.log("Forced click on 'Log In' button via JavaScript.");
+        // *** ADDED: Log URL after JS fallback click ***
+        console.log(
+          `Current URL after login click (JS fallback): ${await driver.getCurrentUrl()}`
+        );
       } else {
         throw error;
       }
