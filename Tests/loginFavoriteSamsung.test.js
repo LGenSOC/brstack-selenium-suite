@@ -76,15 +76,18 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       "Username field not enabled."
     );
 
-    // *** NEW STRATEGY: Forcefully set username value via JavaScript ***
-    await driver.executeScript("arguments[0].value = 'demouser';", userField);
-    console.log("Forced username value via JavaScript.");
+    // *** Fix: Corrected username to 'locked_user' ***
+    await driver.executeScript(
+      "arguments[0].value = 'locked_user';",
+      userField
+    );
+    console.log("Forced username value via JavaScript (now 'locked_user').");
 
     // The explicit wait to confirm the value should still be useful as a double-check
     await driver.wait(
       async () => {
         const value = await userField.getAttribute("value");
-        return value === "demouser";
+        return value === "locked_user"; // CORRECTED THIS LINE
       },
       15000,
       "Username did not persist in the field after JavaScript injection."
@@ -315,24 +318,4 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
 
     // --- Step 4: Verify that the Galaxy S20+ is listed on the Favorites page ---
 
-    // I find the "Favorites" link on the page by its ID and click it to go to the favorites page.
-    await driver.findElement(By.id("favorites")).click();
-    console.log("Clicked 'Favorites' link.");
-
-    // I wait up to 10 seconds until the URL includes "favorites" to confirm I am on the correct page.
-    await driver.wait(until.urlContains("favorites"), 10000);
-    console.log("Navigated to Favorites page.");
-
-    // On the favorites page, I find the name of the product that is listed there.
-    const favoriteProductNameElement = await driver.findElement(
-      By.css(".shelf-item .shelf-item__title")
-    );
-    const favoriteProductName = await favoriteProductNameElement.getText();
-    // I check if that product name includes "Galaxy S20+".
-    expect(favoriteProductName).toContain("Galaxy S20+");
-    console.log("Verified: 'Galaxy S20+' is listed on the Favorites page.");
-
-    // If all checks pass, I can say the test passed!
-    console.log("--- TEST PASSED SUCCESSFULLY! ---");
-  }, 60000); // Set timeout for the test itself (60 seconds)
-});
+    // I find the "Favorites"
