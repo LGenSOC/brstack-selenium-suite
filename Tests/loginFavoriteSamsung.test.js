@@ -79,9 +79,13 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await userField.sendKeys("demouser");
     console.log("Entered username.");
 
-    // Dismiss username autocomplete dropdown
-    await userField.sendKeys(Key.ESCAPE); // Use Key.TAB if ESCAPE doesn't work for this specific dropdown
-    console.log("Dismissed username autocomplete dropdown.");
+    // Dismiss username autocomplete dropdown (TRYING TAB)
+    await userField.sendKeys(Key.TAB); // Changed from Key.ESCAPE to Key.TAB
+    // Add a tiny pause to allow focus shift/dropdown dismissal to fully register
+    await driver.sleep(500); // 500ms pause
+    console.log(
+      "Attempted to dismiss username autocomplete dropdown with TAB."
+    );
 
     // Explicitly wait until the username value is confirmed in the field
     await driver.wait(
@@ -89,9 +93,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         const value = await userField.getAttribute("value");
         return value === "demouser";
       },
-      10000,
-      "Username did not persist in the field after typing."
-    );
+      15000,
+      "Username did not persist in the field after typing and dismissing dropdown."
+    ); // Increased wait slightly
     console.log("Username confirmed in field.");
 
     // I find the password input field similarly.
@@ -119,7 +123,8 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     console.log("Entered password.");
 
     // Dismiss password autocomplete dropdown
-    await passField.sendKeys(Key.ESCAPE); // Use Key.TAB if ESCAPE doesn't work for this specific dropdown
+    await passField.sendKeys(Key.ESCAPE); // You can also try Key.TAB here if ESCAPE doesn't work well
+    await driver.sleep(500); // Small pause for password field too
     console.log("Dismissed password autocomplete dropdown.");
 
     // =================================================
