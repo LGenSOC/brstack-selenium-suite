@@ -140,34 +140,88 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
     // =================================================
 
-    // --- SUBMIT THE LOGIN FORM DIRECTLY ---
-    // Locate the login button first to ensure it's on the page
-    const loginButton = await driver.wait(
-      until.elementLocated(By.id("login-btn")),
-      15000,
-      "Login button not found within 15 seconds."
-    );
+    // --- ATTEMPT LOGIN VIA KEY.ENTER ON PASSWORD FIELD, WITH FALLBACKS ---
 
-    // Find the parent <form> element of the login button
-    // This assumes the login button is nested inside a <form> tag.
-    // If it's not directly inside, you might need to adjust the XPath,
-    // e.g., By.xpath("//form") if there's only one form, or By.id("login_form_id")
-    const loginForm = await loginButton.findElement(
-      By.xpath("./ancestor::form")
-    );
-    console.log("Found the login form element.");
+    // Option 1: Send ENTER key to the password field
+    try {
+      console.log("Attempting login by sending ENTER to password field.");
+      await passField.sendKeys(Key.ENTER);
+      console.log("Sent ENTER key to password field.");
+    } catch (error) {
+      console.warn("Sending ENTER key failed:", error.message);
+      // Fallback to clicking the login button if ENTER fails
+      const loginButton = await driver.wait(
+        until.elementLocated(By.id("login-btn")),
+        15000,
+        "Login button not found within 15 seconds for fallback click."
+      );
+      await driver.wait(
+        until.elementIsVisible(loginButton),
+        10000,
+        "Login button not visible for fallback click."
+      );
+      await driver.wait(
+        until.elementIsEnabled(loginButton),
+        10000,
+        "Login button not enabled for fallback click."
+      );
 
-    // Instead of clicking the button, submit the form directly.
-    // This often triggers the form submission handler more reliably than clicking the button itself.
-    await loginForm.submit();
-    console.log("Submitted login form directly.");
+      try {
+        await loginButton.click();
+        console.log("Fallback: Clicked 'Log In' button using standard click.");
+      } catch (clickError) {
+        // If standard click fails (e.g., due to persistent interception),
+        // fall back to JavaScript click as a last resort.
+        if (
+          clickError.name === "ElementClickInterceptedError" ||
+          clickError.name === "WebDriverError"
+        ) {
+          console.warn(
+            "Fallback click failed (intercepted), attempting JavaScript click:",
+            clickError.message
+          );
+          await driver.executeScript("arguments[0].click();", loginButton);
+          console.log(
+            "Forced click on 'Log In' button via JavaScript as final fallback."
+          );
+        } else {
+          throw clickError; // Re-throw if it's another type of error
+        }
+      }
+    }
+
+    // IMPORTANT: Add a short wait after any login attempt to allow for UI updates or redirects
+    await driver.sleep(1000); // Wait 1 second
+
+    // --- CHECK FOR LOGIN ERROR MESSAGES ---
+    try {
+      const errorMessage = await driver.findElement(
+        By.css('.api-error, .error-message, [role="alert"]')
+      );
+      const errorText = await errorMessage.getText();
+      if (errorText.length > 0 && errorText.includes("Invalid")) {
+        // Basic check for common error indicators
+        console.error(
+          `Login failed: Found error message on page: "${errorText}"`
+        );
+        throw new Error(`Login failed due to error message: "${errorText}"`);
+      }
+    } catch (e) {
+      // This is expected if no error message is present, so we don't re-throw.
+      if (e.name !== "NoSuchElementError") {
+        console.warn(
+          "Could not check for error messages, or unexpected error during check:",
+          e.message
+        );
+      }
+    }
 
     // Wait for the URL to change to the exact dashboard URL, indicating successful login and navigation
     try {
       await driver.wait(
         until.urlIs("https://www.bstackdemo.com/"),
         20000,
-        "Did not navigate to main dashboard URL (https://www.bstackdemo.com/) after login button click."
+        "Did not navigate to main dashboard URL (https://www.bstackdemo.com/) after login attempt."
       );
       console.log(
         `Successfully navigated to dashboard. Current URL: ${await driver.getCurrentUrl()}`
