@@ -150,27 +150,28 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // --- REMOVED: The explicit login button click block has been removed ---
     // We are no longer clicking the login button as we are directly navigating.
 
-    // Now, proceed directly to waiting for dashboard elements.
-    // Instead of waiting for URL, wait for a key element on the dashboard to confirm navigation.
-    const usernameDashboardElement = await driver.wait(
-      // Renamed to avoid conflict with userField
-      until.elementLocated(By.css(".username")),
-      40000 // Generous timeout for the dashboard to load and element to be present
+    // Now, confirm dashboard loaded by waiting for the 'demouser' text itself.
+    await driver.wait(
+      until.elementLocated(By.xpath("//span[contains(text(), 'demouser')]")), // Wait for the span containing 'demouser'
+      40000, // Generous timeout for the dashboard to load and element to be present
+      "Demouser text not found on dashboard within 40 seconds."
     );
-    // Add another URL check here, useful to confirm location before element check
     console.log(
-      `Current URL before dashboard check: ${await driver.getCurrentUrl()}`
+      `Current URL before dashboard verification: ${await driver.getCurrentUrl()}`
     );
 
-    await driver.wait(
-      until.elementIsVisible(usernameDashboardElement),
-      10000, // Shorter wait for visibility once located
-      "Username element not visible on dashboard within 10 seconds of being located."
+    const usernameTextElement = await driver.findElement(
+      By.xpath("//span[contains(text(), 'demouser')]")
     );
-    console.log("Dashboard loaded: Username element found and visible.");
+    await driver.wait(
+      until.elementIsVisible(usernameTextElement),
+      10000, // Shorter wait for visibility once located
+      "Demouser text not visible on dashboard within 10 seconds of being located."
+    );
+    console.log("Dashboard loaded: 'demouser' text element found and visible.");
 
     // Now, I check if I can see the "demouser" text on the page.
-    expect(await usernameDashboardElement.getText()).toContain("demouser");
+    expect(await usernameTextElement.getText()).toContain("demouser");
     console.log("Login verified: 'demouser' text found.");
 
     // --- Step 2: Filter the products to show "Samsung" devices only ---
