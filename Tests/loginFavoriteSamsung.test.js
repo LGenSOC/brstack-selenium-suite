@@ -76,27 +76,20 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       "Username field not enabled."
     );
 
-    await userField.sendKeys("demouser");
-    console.log("Entered username.");
+    // *** NEW STRATEGY: Forcefully set username value via JavaScript ***
+    await driver.executeScript("arguments[0].value = 'demouser';", userField);
+    console.log("Forced username value via JavaScript.");
 
-    // Dismiss username autocomplete dropdown (TRYING TAB)
-    await userField.sendKeys(Key.TAB); // Changed from Key.ESCAPE to Key.TAB
-    // Add a tiny pause to allow focus shift/dropdown dismissal to fully register
-    await driver.sleep(500); // 500ms pause
-    console.log(
-      "Attempted to dismiss username autocomplete dropdown with TAB."
-    );
-
-    // Explicitly wait until the username value is confirmed in the field
+    // The explicit wait to confirm the value should still be useful as a double-check
     await driver.wait(
       async () => {
         const value = await userField.getAttribute("value");
         return value === "demouser";
       },
       15000,
-      "Username did not persist in the field after typing and dismissing dropdown."
-    ); // Increased wait slightly
-    console.log("Username confirmed in field.");
+      "Username did not persist in the field after JavaScript injection."
+    );
+    console.log("Username value confirmed after JavaScript injection.");
 
     // I find the password input field similarly.
     const passwordParentDiv = await driver.wait(
@@ -119,10 +112,11 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       "Password field not enabled."
     );
 
+    // For password, let's stick with sendKeys first, it might work better without the dropdown interference
     await passField.sendKeys("testingisfun99");
     console.log("Entered password.");
 
-    // Dismiss password autocomplete dropdown
+    // Dismiss password autocomplete dropdown (Keep ESCAPE/TAB here as sendKeys was used)
     await passField.sendKeys(Key.ESCAPE); // You can also try Key.TAB here if ESCAPE doesn't work well
     await driver.sleep(500); // Small pause for password field too
     console.log("Dismissed password autocomplete dropdown.");
@@ -179,19 +173,20 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
 
     // Instead of waiting for URL, wait for a key element on the dashboard to confirm navigation.
-    const usernameElement = await driver.wait(
+    const usernameDashboardElement = await driver.wait(
+      // Renamed to avoid conflict with userField
       until.elementLocated(By.css(".username")),
       40000 // Generous timeout for the dashboard to load and element to be present
     );
     await driver.wait(
-      until.elementIsVisible(usernameElement),
+      until.elementIsVisible(usernameDashboardElement),
       10000, // Shorter wait for visibility once located
       "Username element not visible on dashboard within 10 seconds of being located."
     );
     console.log("Dashboard loaded: Username element found and visible.");
 
     // Now, I check if I can see the "demouser" text on the page.
-    expect(await usernameElement.getText()).toContain("demouser");
+    expect(await usernameDashboardElement.getText()).toContain("demouser");
     console.log("Login verified: 'demouser' text found.");
 
     // --- Step 2: Filter the products to show "Samsung" devices only ---
