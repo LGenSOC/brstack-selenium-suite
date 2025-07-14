@@ -115,17 +115,10 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await passField.sendKeys("testingisfun99");
     console.log("Entered password.");
 
-    // Dismiss password autocomplete dropdown (Reverted to original dismissal)
+    // Dismiss password autocomplete dropdown
     await passField.sendKeys(Key.ESCAPE); // You can also try Key.TAB here if ESCAPE doesn't work well
     await driver.sleep(500); // Small pause for password field too
     console.log("Dismissed password autocomplete dropdown.");
-
-    // *** ADDED: Force direct navigation to dashboard after filling credentials ***
-    await driver.get("https://www.bstackdemo.com/");
-    console.log("Forced navigation to dashboard after filling credentials.");
-    console.log(
-      `Current URL after forced navigation: ${await driver.getCurrentUrl()}`
-    );
 
     // =================================================
     // NEW ROBUST WAIT FOR OVERLAYS TO DISAPPEAR (Keep this, it's good)
@@ -147,8 +140,51 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
     // =================================================
 
-    // --- REMOVED: The explicit login button click block has been removed ---
-    // We are no longer clicking the login button as we are directly navigating.
+    // --- RE-INTRODUCE AND ENHANCE THE LOGIN BUTTON CLICK ---
+    // Now, I find the "Log In" button by its ID.
+    const loginButton = await driver.wait(
+      until.elementLocated(By.id("login-btn")), // Wait for the element to be present in the DOM
+      15000,
+      "Login button not found within 15 seconds."
+    );
+    await driver.wait(
+      until.elementIsVisible(loginButton), // Wait for the element to be visible
+      10000,
+      "Login button not visible within 10 seconds."
+    );
+    await driver.wait(
+      until.elementIsEnabled(loginButton), // Wait for the element to be enabled
+      10000,
+      "Login button not enabled within 10 seconds."
+    );
+    console.log("Login button found and clickable.");
+
+    // Attempt to click the button, with JavaScript fallback
+    try {
+      await loginButton.click();
+      console.log("Clicked 'Log In' button using standard click.");
+    } catch (error) {
+      // If standard click fails (e.g., due to persistent interception),
+      // fall back to JavaScript click as a last resort.
+      if (
+        error.name === "ElementClickInterceptedError" ||
+        error.name === "WebDriverError"
+      ) {
+        console.warn(
+          "Standard click failed (intercepted), attempting JavaScript click:",
+          error.message
+        );
+        await driver.executeScript("arguments[0].click();", loginButton);
+        console.log("Forced click on 'Log In' button via JavaScript.");
+      } else {
+        throw error; // Re-throw if it's another type of error
+      }
+    }
+    // Add a small pause after clicking, allowing the browser to process navigation
+    await driver.sleep(2000); // Wait 2 seconds for potential redirect/AJAX call
+    console.log(
+      `Current URL after login button click: ${await driver.getCurrentUrl()}`
+    );
 
     // Now, confirm dashboard loaded by waiting for the 'demouser' text itself.
     await driver.wait(
