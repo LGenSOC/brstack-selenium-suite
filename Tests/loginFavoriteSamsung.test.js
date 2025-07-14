@@ -180,17 +180,29 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         throw error; // Re-throw if it's another type of error
       }
     }
-    // Add a small pause after clicking, allowing the browser to process navigation
-    await driver.sleep(2000); // Wait 2 seconds for potential redirect/AJAX call
-    console.log(
-      `Current URL after login button click: ${await driver.getCurrentUrl()}`
-    );
+
+    // Wait for the URL to change to the dashboard URL, indicating successful login and navigation
+    try {
+      await driver.wait(
+        until.urlContains("https://www.bstackdemo.com/"),
+        20000,
+        "Did not navigate to dashboard after login button click."
+      );
+      console.log(
+        `Successfully navigated to dashboard. Current URL: ${await driver.getCurrentUrl()}`
+      );
+    } catch (e) {
+      console.error(`Error navigating after login: ${e.message}`);
+      console.log(`Current URL still: ${await driver.getCurrentUrl()}`);
+      throw e; // Re-throw to fail the test if navigation doesn't occur
+    }
 
     // Now, confirm dashboard loaded by waiting for the 'demouser' text itself.
+    // This wait should now succeed if the URL change also succeeded.
     await driver.wait(
       until.elementLocated(By.xpath("//span[contains(text(), 'demouser')]")), // Wait for the span containing 'demouser'
-      40000, // Generous timeout for the dashboard to load and element to be present
-      "Demouser text not found on dashboard within 40 seconds."
+      20000, // A bit shorter now, as we expect to be on the correct page
+      "Demouser text not found on dashboard after URL change."
     );
     console.log(
       `Current URL before dashboard verification: ${await driver.getCurrentUrl()}`
