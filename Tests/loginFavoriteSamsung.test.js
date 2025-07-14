@@ -115,13 +115,16 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await passField.sendKeys("testingisfun99");
     console.log("Entered password.");
 
-    // *** MODIFIED: Attempting to submit form by sending ENTER to password field ***
-    // Dismiss password autocomplete dropdown if it appears, then send ENTER
-    await passField.sendKeys(Key.TAB); // Try TAB first to get off the field
-    await driver.sleep(500); // Small pause
-    await passField.sendKeys(Key.ENTER); // Send ENTER to submit the form
+    // Dismiss password autocomplete dropdown (Reverted to original dismissal)
+    await passField.sendKeys(Key.ESCAPE); // You can also try Key.TAB here if ESCAPE doesn't work well
+    await driver.sleep(500); // Small pause for password field too
+    console.log("Dismissed password autocomplete dropdown.");
+
+    // *** ADDED: Force direct navigation to dashboard after filling credentials ***
+    await driver.get("https://www.bstackdemo.com/");
+    console.log("Forced navigation to dashboard after filling credentials.");
     console.log(
-      "Attempted to submit login form by sending ENTER to password field."
+      `Current URL after forced navigation: ${await driver.getCurrentUrl()}`
     );
 
     // =================================================
@@ -144,65 +147,20 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
     // =================================================
 
-    // --- REMOVED/COMMENTED OUT: The explicit login button click is now handled by Key.ENTER ---
-    // // Now, I find the "Log In" button by its ID.
-    // const loginButton = await driver.wait(
-    //   until.elementLocated(By.id("login-btn")),
-    //   15000,
-    //   "Login button not found within 15 seconds."
-    // );
-    // await driver.wait(
-    //   until.elementIsVisible(loginButton),
-    //   10000,
-    //   "Login button not visible within 10 seconds."
-    // );
-    // await driver.wait(
-    //   until.elementIsEnabled(loginButton),
-    //   10000,
-    //   "Login button not enabled within 10 seconds."
-    // );
-    // console.log("Login button found and clickable.");
+    // --- REMOVED: The explicit login button click block has been removed ---
+    // We are no longer clicking the login button as we are directly navigating.
 
-    // // Attempt to click the button.
-    // try {
-    //   await loginButton.click();
-    //   console.log("Clicked 'Log In' button using standard click.");
-    //   // *** ADDED: Log URL after successful click ***
-    //   console.log(
-    //     `Current URL after login click: ${await driver.getCurrentUrl()}`
-    //   );
-    // } catch (error) {
-    //   // If standard click fails (e.g., due to persistent interception),
-    //   // fall back to JavaScript click as a last resort.
-    //   if (
-    //     error.name === "ElementClickInterceptedError" ||
-    //     error.name === "WebDriverError"
-    //   ) {
-    //     console.warn(
-    //       "Standard click failed, attempting JavaScript click:",
-    //       error.message
-    //     );
-    //     await driver.executeScript("arguments[0].click();", loginButton);
-    //     console.log("Forced click on 'Log In' button via JavaScript.");
-    //     // *** ADDED: Log URL after JS fallback click ***
-    //     console.log(
-    //       `Current URL after login click (JS fallback): ${await driver.getCurrentUrl()}`
-    //     );
-    //   } else {
-    //     throw error;
-    //   }
-    // }
-    // --- END REMOVED/COMMENTED OUT BLOCK ---
-
+    // Now, proceed directly to waiting for dashboard elements.
     // Instead of waiting for URL, wait for a key element on the dashboard to confirm navigation.
     const usernameDashboardElement = await driver.wait(
       // Renamed to avoid conflict with userField
       until.elementLocated(By.css(".username")),
       40000 // Generous timeout for the dashboard to load and element to be present
     );
+    // Add another URL check here, useful to confirm location before element check
     console.log(
       `Current URL before dashboard check: ${await driver.getCurrentUrl()}`
-    ); // Add another URL check here
+    );
 
     await driver.wait(
       until.elementIsVisible(usernameDashboardElement),
