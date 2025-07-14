@@ -142,11 +142,20 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // =================================================
 
     // Now, I find the "Log In" button by its ID.
-    // Use elementToBeClickable for the login button
     const loginButton = await driver.wait(
-      until.elementToBeClickable(By.id("login-btn")),
-      15000, // Wait for element to be present, visible, and enabled for clicking
-      "Login button not clickable within 15 seconds."
+      until.elementLocated(By.id("login-btn")), // Wait for the element to be present in the DOM
+      15000,
+      "Login button not found within 15 seconds."
+    );
+    await driver.wait(
+      until.elementIsVisible(loginButton), // Wait for the element to be visible
+      10000,
+      "Login button not visible within 10 seconds."
+    );
+    await driver.wait(
+      until.elementIsEnabled(loginButton), // Wait for the element to be enabled
+      10000,
+      "Login button not enabled within 10 seconds."
     );
     console.log("Login button found and clickable.");
 
