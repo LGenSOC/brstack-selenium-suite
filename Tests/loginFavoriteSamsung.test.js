@@ -54,20 +54,47 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
   test("should log in, filter Samsung, favorite Galaxy S20+, and verify on favorites page", async () => {
     // --- Step 1: Log into www.bstackdemo.com ---
 
-    // I find the username input field by first locating its parent div by ID,
-    // and then finding the 'input' element within that div.
+    // I find the username input field's parent div by ID.
     const usernameParentDiv = await driver.wait(
       until.elementLocated(By.id("username")),
       15000
     );
+    // Then find the 'input' element within that div.
     const userField = await usernameParentDiv.findElement(
       By.css('input[type="text"]')
     );
+
+    // Wait for the username field to be interactable
+    await driver.wait(
+      until.elementIsVisible(userField),
+      10000,
+      "Username field not visible."
+    );
+    await driver.wait(
+      until.elementIsEnabled(userField),
+      10000,
+      "Username field not enabled."
+    );
+
     await userField.sendKeys("demouser");
     console.log("Entered username.");
 
-    // I find the password input field similarly, by locating its parent div by ID,
-    // and then finding the 'input' element within that div.
+    // Dismiss username autocomplete dropdown
+    await userField.sendKeys(Key.ESCAPE); // Use Key.TAB if ESCAPE doesn't work for this specific dropdown
+    console.log("Dismissed username autocomplete dropdown.");
+
+    // Explicitly wait until the username value is confirmed in the field
+    await driver.wait(
+      async () => {
+        const value = await userField.getAttribute("value");
+        return value === "demouser";
+      },
+      10000,
+      "Username did not persist in the field after typing."
+    );
+    console.log("Username confirmed in field.");
+
+    // I find the password input field similarly.
     const passwordParentDiv = await driver.wait(
       until.elementLocated(By.id("password")),
       15000
@@ -75,30 +102,39 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     const passField = await passwordParentDiv.findElement(
       By.css('input[type="text"]')
     );
+
+    // Wait for the password field to be interactable
+    await driver.wait(
+      until.elementIsVisible(passField),
+      10000,
+      "Password field not visible."
+    );
+    await driver.wait(
+      until.elementIsEnabled(passField),
+      10000,
+      "Password field not enabled."
+    );
+
     await passField.sendKeys("testingisfun99");
     console.log("Entered password.");
 
-    // === NEW ROBUST WAIT FOR OVERLAYS TO DISAPPEAR ===
-    // This looks for common overlay patterns that might intercept clicks
-    // and waits for them to become stale.
+    // Dismiss password autocomplete dropdown
+    await passField.sendKeys(Key.ESCAPE); // Use Key.TAB if ESCAPE doesn't work for this specific dropdown
+    console.log("Dismissed password autocomplete dropdown.");
+
+    // =================================================
+    // NEW ROBUST WAIT FOR OVERLAYS TO DISAPPEAR (Keep this, it's good)
     try {
-      // Attempt to find any potential full-page overlay or loader.
-      // We'll prioritize the specific class if it consistently appears, but
-      // also include generic loader/spinner/overlay selectors.
       const potentialOverlay = await driver.findElement(
         By.css(
           'div[class*="css-"], div.ReactModal__Overlay, .loader, .spinner, [aria-busy="true"]'
         )
       );
-      // Wait for the found overlay to become stale (disappear from DOM)
       await driver.wait(until.stalenessOf(potentialOverlay), 10000);
       console.log(
         "Waited for potential intercepting overlay/loader to disappear."
       );
     } catch (e) {
-      // Log if no such overlay was found, or if it disappeared before we could find it.
-      // This is expected if the site is very fast or the overlay is not consistently present,
-      // so it's not a critical error.
       console.log(
         "No common intercepting overlay found or it disappeared quickly:",
         e.message
@@ -107,21 +143,13 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // =================================================
 
     // Now, I find the "Log In" button by its ID.
-    // We'll explicitly wait for it to be located, visible, and enabled.
+    // Use elementToBeClickable for the login button
     const loginButton = await driver.wait(
-      until.elementLocated(By.id("login-btn")),
-      15000 // Wait for element to be present in DOM
+      until.elementToBeClickable(By.id("login-btn")),
+      15000, // Wait for element to be present, visible, and enabled for clicking
+      "Login button not clickable within 15 seconds."
     );
-
-    // Explicitly wait for the button to be visible.
-    await driver.wait(
-      until.elementIsVisible(loginButton),
-      10000,
-      "Login button not visible within 10 seconds"
-    );
-
-    // Explicitly wait for the button to be enabled.
-    await driver.wait(until.elementIsEnabled(loginButton), 10000);
+    console.log("Login button found and clickable.");
 
     // Attempt to click the button.
     try {
@@ -134,7 +162,6 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         error.name === "ElementClickInterceptedError" ||
         error.name === "WebDriverError"
       ) {
-        // FORCED TO SINGLE LINE TO RESOLVE VISUAL STUDIO 'EXPRESSION EXPECTED' ERROR
         console.warn(
           "Standard click failed, attempting JavaScript click:",
           error.message
@@ -142,20 +169,23 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         await driver.executeScript("arguments[0].click();", loginButton);
         console.log("Forced click on 'Log In' button via JavaScript.");
       } else {
-        // Re-throw other unexpected errors
         throw error;
       }
     }
 
-    // I wait up to 40 seconds (increased from 10) until the website's address (URL) changes to include "dashboard".
-    // This helps me know the login was successful.
-    await driver.wait(until.urlContains("dashboard"), 40000); // Increased timeout to 40 seconds
-    console.log("Navigated to dashboard after login.");
+    // Instead of waiting for URL, wait for a key element on the dashboard to confirm navigation.
+    const usernameElement = await driver.wait(
+      until.elementLocated(By.css(".username")),
+      40000 // Generous timeout for the dashboard to load and element to be present
+    );
+    await driver.wait(
+      until.elementIsVisible(usernameElement),
+      10000, // Shorter wait for visibility once located
+      "Username element not visible on dashboard within 10 seconds of being located."
+    );
+    console.log("Dashboard loaded: Username element found and visible.");
 
-    // After logging in, I check if I can see the "demouser" text on the page.
-    // I find the element that shows the username.
-    const usernameElement = await driver.findElement(By.css(".username"));
-    // I check if the text of that element actually includes "demouser".
+    // Now, I check if I can see the "demouser" text on the page.
     expect(await usernameElement.getText()).toContain("demouser");
     console.log("Login verified: 'demouser' text found.");
 
