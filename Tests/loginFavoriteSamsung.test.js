@@ -243,23 +243,24 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
 
     // --- Step 2: Filter the products to show "Samsung" devices only ---
 
-    // Based on the screenshot, 'Samsung' is a direct filter option on the left sidebar,
-    // not under a 'Vendors' category or part of the 'Sort By' dropdown.
-    // I need to locate the <p> element with the text 'Samsung' and click it.
-
-    // I find the specific 'Samsung' filter option by its text, which is a <p> tag.
-    const samsungFilterP = await driver.wait(
-      until.elementLocated(By.xpath("//p[text()='Samsung']")),
+    // I find the specific 'Samsung' filter by targeting its span with class 'checkmark'
+    // nested within a label that contains an input with value 'Samsung'
+    const samsungFilterCheckboxSpan = await driver.wait(
+      until.elementLocated(
+        By.xpath(
+          "//div[@class='filters']//label[./input[@value='Samsung']]/span[@class='checkmark']"
+        )
+      ),
       10000,
-      "'Samsung' filter option (p tag) not found on sidebar."
+      "'Samsung' filter checkmark span not found on sidebar."
     );
     await driver.wait(
-      until.elementIsVisible(samsungFilterP),
+      until.elementIsVisible(samsungFilterCheckboxSpan),
       5000,
-      "'Samsung' filter option found but not visible."
+      "'Samsung' filter checkmark span found but not visible."
     );
-    await samsungFilterP.click();
-    console.log("Selected 'Samsung' filter from sidebar.");
+    await samsungFilterCheckboxSpan.click();
+    console.log("Selected 'Samsung' filter (checkmark span) from sidebar.");
 
     // I wait up to 10 seconds for the loading spinner to disappear, which means the filter has finished applying.
     await driver.wait(
