@@ -232,7 +232,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       console.warn("Attempting secondary verification for dashboard presence.");
       // Fallback: If demouser text fails, try to verify another key dashboard element
       await driver.wait(
-        until.elementLocated(By.css(".sort select")),
+        until.elementLocated(By.css(".sort select")), // This is the sorting dropdown, not a filter. It should be there.
         20000,
         "Secondary login verification (product sort dropdown) failed. Dashboard content likely not fully loaded."
       );
@@ -243,48 +243,23 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
 
     // --- Step 2: Filter the products to show "Samsung" devices only ---
 
-    // I click on the sorting/filtering dropdown menu.
-    const sortDropdown = await driver.wait(
-      until.elementLocated(By.css(".sort select")),
-      10000,
-      "Product sort/filter dropdown not found."
-    );
-    await sortDropdown.click();
-    console.log("Clicked product sort/filter dropdown.");
+    // Based on the screenshot, 'Samsung' is a direct filter option on the left sidebar,
+    // not under a 'Vendors' category or part of the 'Sort By' dropdown.
+    // I need to locate the <p> element with the text 'Samsung' and click it.
 
-    await driver.sleep(1500); // I give a bit more time for the initial filter options to render
-
-    // NEW STEP: Locate and click the 'Vendors' category/option.
-    // I'm assuming 'Vendors' is an <li> element, similar to other filter categories.
-    const vendorsOption = await driver.wait(
-      until.elementLocated(By.xpath("//li[text()='Vendors']")),
+    // I find the specific 'Samsung' filter option by its text, which is a <p> tag.
+    const samsungFilterP = await driver.wait(
+      until.elementLocated(By.xpath("//p[text()='Samsung']")),
       10000,
-      "'Vendors' filter option not found."
+      "'Samsung' filter option (p tag) not found on sidebar."
     );
     await driver.wait(
-      until.elementIsVisible(vendorsOption),
+      until.elementIsVisible(samsungFilterP),
       5000,
-      "'Vendors' filter option found but not visible."
+      "'Samsung' filter option found but not visible."
     );
-    await vendorsOption.click();
-    console.log("Selected 'Vendors' filter category.");
-
-    await driver.sleep(1500); // I give time for the 'Vendors' sub-options to load (including Samsung)
-
-    // NEW STEP: Locate and click the 'Samsung' button under 'Vendors'.
-    // You told me it's a "button", so I'm looking for a button with the text 'Samsung'.
-    const samsungButton = await driver.wait(
-      until.elementLocated(By.xpath("//button[text()='Samsung']")),
-      10000,
-      "'Samsung' button under Vendors not found."
-    );
-    await driver.wait(
-      until.elementIsVisible(samsungButton),
-      5000,
-      "'Samsung' button found but not visible."
-    );
-    await samsungButton.click();
-    console.log("Clicked 'Samsung' button under Vendors.");
+    await samsungFilterP.click();
+    console.log("Selected 'Samsung' filter from sidebar.");
 
     // I wait up to 10 seconds for the loading spinner to disappear, which means the filter has finished applying.
     await driver.wait(
