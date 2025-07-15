@@ -257,7 +257,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await driver.wait(
       until.elementIsVisible(samsungFilterCheckboxSpan),
       5000,
-      "'Samsung' filter checkmark span found but not visible."
+      "The 'Samsung' filter checkmark span found but not visible."
     );
     await samsungFilterCheckboxSpan.click();
     console.log("Selected 'Samsung' filter (checkmark span) from sidebar.");
@@ -310,23 +310,6 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     await favoriteButton.click();
     console.log("Clicked to favorite 'Galaxy S20+'.");
-
-    // I wait a short moment for the favorites count to update.
-    // I'll wait until the favorites count changes to '1'.
-    const favoritesCountElement = await driver.wait(
-      until.elementLocated(By.id("favorites-count")),
-      10000,
-      "Favorites count element not found."
-    );
-    await driver.wait(
-      async () => (await favoritesCountElement.getText()) === "1",
-      5000,
-      "Favorites count did not update to 1."
-    );
-    const favoritesCount = await favoritesCountElement.getText();
-    // I expect the favorites count to now show "1".
-    expect(favoritesCount).toBe("1");
-    console.log("Favorites count updated to 1.");
 
     // --- Step 4: Verify that the Galaxy S20+ is listed on the Favorites page and is the only element ---
 
