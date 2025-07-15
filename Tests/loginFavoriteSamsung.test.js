@@ -252,10 +252,10 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await sortDropdown.click();
     console.log("Clicked product sort/filter dropdown.");
 
-    await driver.sleep(1500); // Give a bit more time for the initial filter options to render
+    await driver.sleep(1500); // I give a bit more time for the initial filter options to render
 
     // NEW STEP: Locate and click the 'Vendors' category/option.
-    // Assuming 'Vendors' is an <li> element, similar to other filter categories.
+    // I'm assuming 'Vendors' is an <li> element, similar to other filter categories.
     const vendorsOption = await driver.wait(
       until.elementLocated(By.xpath("//li[text()='Vendors']")),
       10000,
@@ -269,10 +269,10 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await vendorsOption.click();
     console.log("Selected 'Vendors' filter category.");
 
-    await driver.sleep(1500); // Give time for the 'Vendors' sub-options to load (including Samsung)
+    await driver.sleep(1500); // I give time for the 'Vendors' sub-options to load (including Samsung)
 
     // NEW STEP: Locate and click the 'Samsung' button under 'Vendors'.
-    // The user specified it's a "button".
+    // You told me it's a "button", so I'm looking for a button with the text 'Samsung'.
     const samsungButton = await driver.wait(
       until.elementLocated(By.xpath("//button[text()='Samsung']")),
       10000,
@@ -295,7 +295,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     console.log("Waited for filter to apply.");
 
     // I quickly check the first product shown after filtering.
-    // Add a wait to ensure products are re-rendered after filter.
+    // I'll add a wait to ensure products are re-rendered after filter.
     const productNames = await driver.wait(
       until.elementsLocated(By.css(".shelf-item .shelf-item__title")),
       15000,
@@ -309,20 +309,45 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // --- Step 3: Favorite the "Galaxy S20+" device ---
 
     // I find the text "Galaxy S20+" on the page.
-    const galaxyS20PlusName = await driver.findElement(
-      By.xpath("//p[contains(text(), 'Galaxy S20+')]")
+    const galaxyS20PlusName = await driver.wait(
+      until.elementLocated(By.xpath("//p[contains(text(), 'Galaxy S20+')]")),
+      10000,
+      "Galaxy S20+ product name not found."
     );
+    console.log("Found 'Galaxy S20+' product.");
+
     // From that product name, I go up the website's structure to find its main product box (the 'shelf-item').
     const parentShelfItem = await galaxyS20PlusName.findElement(
       By.xpath("./ancestor::div[contains(@class, 'shelf-item')]")
     );
+    console.log("Found parent shelf item for 'Galaxy S20+'.");
+
     // Inside that product box, I find the heart icon (which is part of the buy button in this case) and click it to favorite.
-    await parentShelfItem.findElement(By.css(".shelf-item__buy-btn")).click();
+    // I will wait for this button to be clickable.
+    const favoriteButton = await driver.wait(
+      until.elementLocated(By.css(".shelf-item__buy-btn")),
+      10000,
+      "Favorite button not found on Galaxy S20+ item."
+    );
+    await driver.wait(
+      until.elementIsVisible(favoriteButton),
+      5000,
+      "Favorite button found but not visible."
+    );
+    await favoriteButton.click();
     console.log("Clicked to favorite 'Galaxy S20+'.");
 
     // I wait a short moment for the favorites count to update.
-    const favoritesCountElement = await driver.findElement(
-      By.id("favorites-count")
+    // I'll wait until the favorites count changes to '1'.
+    const favoritesCountElement = await driver.wait(
+      until.elementLocated(By.id("favorites-count")),
+      10000,
+      "Favorites count element not found."
+    );
+    await driver.wait(
+      async () => (await favoritesCountElement.getText()) === "1",
+      5000,
+      "Favorites count did not update to 1."
     );
     const favoritesCount = await favoritesCountElement.getText();
     // I expect the favorites count to now show "1".
@@ -332,14 +357,34 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // --- Step 4: Verify that the Galaxy S20+ is listed on the Favorites page ---
 
     // I find the "Favorites" link on the page by its ID and click it to go to the favorites page.
-    await driver.findElement(By.id("favorites")).click();
+    const favoritesLink = await driver.wait(
+      until.elementLocated(By.id("favorites")),
+      10000,
+      "Favorites link in navigation not found."
+    );
+    await favoritesLink.click();
     console.log("Clicked 'Favorites' link.");
 
-    await driver.sleep(3000); // Give time for favorites page content to load
+    // I give time for favorites page content to load.
+    // I'll also wait until the URL changes to the favorites page.
+    await driver.wait(
+      until.urlContains("bstackdemo.com/favourites"),
+      15000,
+      "Did not navigate to favorites page."
+    );
+    console.log(`Mapsd to favorites page: ${await driver.getCurrentUrl()}`);
 
     // On the favorites page, I find the name of the product that is listed there.
-    const favoriteProductNameElement = await driver.findElement(
-      By.css(".shelf-item .shelf-item__title")
+    // I'll wait until the Galaxy S20+ element appears on this new page.
+    const favoriteProductNameElement = await driver.wait(
+      until.elementLocated(By.xpath("//p[contains(text(), 'Galaxy S20+')]")),
+      15000,
+      "Galaxy S20+ not found on Favorites page."
+    );
+    await driver.wait(
+      until.elementIsVisible(favoriteProductNameElement),
+      5000,
+      "Galaxy S20+ found on favorites page but not visible."
     );
     const favoriteProductName = await favoriteProductNameElement.getText();
     // I check if that product name includes "Galaxy S20+".
@@ -348,5 +393,5 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
 
     // If all checks pass, I can say the test passed!
     console.log("--- TEST PASSED SUCCESSFULLY! ---");
-  }, 90000); // Increased overall test timeout to 90 seconds
+  }, 120000); // Increased overall test timeout to 120 seconds (2 minutes)
 });
