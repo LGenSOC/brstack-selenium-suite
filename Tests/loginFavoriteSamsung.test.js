@@ -244,23 +244,62 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // --- Step 2: Filter the products to show "Samsung" devices only ---
 
     // I click on the sorting/filtering dropdown menu.
-    await driver.findElement(By.css(".sort select")).click();
+    const sortDropdown = await driver.wait(
+      until.elementLocated(By.css(".sort select")),
+      10000,
+      "Product sort/filter dropdown not found."
+    );
+    await sortDropdown.click();
     console.log("Clicked product sort/filter dropdown.");
 
-    // I find the specific item in the list that says "Samsung" and click it to apply the filter.
-    await driver.findElement(By.xpath("//li[text()='Samsung']")).click();
-    console.log("Selected 'Samsung' filter.");
+    await driver.sleep(1500); // Give a bit more time for the initial filter options to render
+
+    // NEW STEP: Locate and click the 'Vendors' category/option.
+    // Assuming 'Vendors' is an <li> element, similar to other filter categories.
+    const vendorsOption = await driver.wait(
+      until.elementLocated(By.xpath("//li[text()='Vendors']")),
+      10000,
+      "'Vendors' filter option not found."
+    );
+    await driver.wait(
+      until.elementIsVisible(vendorsOption),
+      5000,
+      "'Vendors' filter option found but not visible."
+    );
+    await vendorsOption.click();
+    console.log("Selected 'Vendors' filter category.");
+
+    await driver.sleep(1500); // Give time for the 'Vendors' sub-options to load (including Samsung)
+
+    // NEW STEP: Locate and click the 'Samsung' button under 'Vendors'.
+    // The user specified it's a "button".
+    const samsungButton = await driver.wait(
+      until.elementLocated(By.xpath("//button[text()='Samsung']")),
+      10000,
+      "'Samsung' button under Vendors not found."
+    );
+    await driver.wait(
+      until.elementIsVisible(samsungButton),
+      5000,
+      "'Samsung' button found but not visible."
+    );
+    await samsungButton.click();
+    console.log("Clicked 'Samsung' button under Vendors.");
 
     // I wait up to 10 seconds for the loading spinner to disappear, which means the filter has finished applying.
     await driver.wait(
       until.stalenessOf(driver.findElement(By.css(".spinner"))),
-      10000
+      10000,
+      "Spinner did not disappear within 10 seconds after filter selection."
     );
     console.log("Waited for filter to apply.");
 
     // I quickly check the first product shown after filtering.
-    const productNames = await driver.findElements(
-      By.css(".shelf-item .shelf-item__title")
+    // Add a wait to ensure products are re-rendered after filter.
+    const productNames = await driver.wait(
+      until.elementsLocated(By.css(".shelf-item .shelf-item__title")),
+      15000,
+      "No product names found after filter applied."
     );
     const firstProductName = await productNames[0].getText();
     // I expect the first product name to include "Samsung".
