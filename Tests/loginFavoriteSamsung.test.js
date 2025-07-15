@@ -82,39 +82,77 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
   test("should log in, filter Samsung, favorite Galaxy S20+, and verify on favorites page", async () => {
     // --- Step 1: Log into www.bstackdemo.com ---
     console.log(
-      "Attempting login using direct JavaScript injection for inputs, then clicking login button."
+      "Attempting login using click-dropdown-option strategy for React Select components."
     );
 
-    // Direct JavaScript to set username value and trigger events
-    await driver.executeScript(
-      "document.getElementById('react-select-2-input').value = 'demouser';" +
-        "document.getElementById('react-select-2-input').dispatchEvent(new Event('change'));" +
-        "document.getElementById('react-select-2-input').dispatchEvent(new Event('input'));" +
-        "console.log('JS: Username value set and events dispatched.');"
+    // --- Username selection ---
+    const usernameDropdownWrapper = await driver.wait(
+      until.elementLocated(By.id("username")),
+      15000,
+      "Username dropdown wrapper (id='username') not found."
     );
-    console.log("Selenium: Username value injection via JavaScript completed.");
+    console.log("Username dropdown wrapper found.");
+    await usernameDropdownWrapper.click();
+    console.log("Clicked username dropdown wrapper to open options.");
+    await driver.sleep(1500); // Give a bit more time for options to render in the DOM
 
-    // Direct JavaScript to set password value and trigger events
-    await driver.executeScript(
-      "document.getElementById('react-select-3-input').value = 'testingisfun99';" +
-        "document.getElementById('react-select-3-input').dispatchEvent(new Event('change'));" +
-        "document.getElementById('react-select-3-input').dispatchEvent(new Event('input'));" +
-        "console.log('JS: Password value set and events dispatched.');"
+    // Locate the specific 'demouser' option by its text content and a common React Select ID pattern
+    // This assumes the options are `div` elements with an ID starting with `react-select` and have the exact text.
+    const demouserOption = await driver.wait(
+      until.elementLocated(
+        By.xpath("//div[contains(@id, 'react-select') and text()='demouser']")
+      ),
+      10000,
+      "Specific option 'demouser' not found in username dropdown."
     );
-    console.log("Selenium: Password value injection via JavaScript completed.");
+    // Ensure the option is visible before attempting to click it
+    await driver.wait(
+      until.elementIsVisible(demouserOption),
+      5000,
+      "Option 'demouser' found but not visible."
+    );
+    await demouserOption.click();
+    console.log("Selected 'demouser' from dropdown.");
+    await driver.sleep(1500); // Give time for selection to register and UI to update
 
-    // Give a short moment for the UI to potentially register changes after JS value setting
-    await driver.sleep(1500);
+    // --- Password selection (similar logic) ---
+    const passwordDropdownWrapper = await driver.wait(
+      until.elementLocated(By.id("password")),
+      15000,
+      "Password dropdown wrapper (id='password') not found."
+    );
+    console.log("Password dropdown wrapper found.");
+    await passwordDropdownWrapper.click();
+    console.log("Clicked password dropdown wrapper to open options.");
+    await driver.sleep(1500); // Give a bit more time for options to render
 
-    // Find the login button and click it, instead of directly submitting the form via JS
+    // Locate the specific 'testingisfun99' option by its text content and a common React Select ID pattern
+    const testingisfun99Option = await driver.wait(
+      until.elementLocated(
+        By.xpath(
+          "//div[contains(@id, 'react-select') and text()='testingisfun99']"
+        )
+      ),
+      10000,
+      "Specific option 'testingisfun99' not found in password dropdown."
+    );
+    // Ensure the option is visible before attempting to click it
+    await driver.wait(
+      until.elementIsVisible(testingisfun99Option),
+      5000,
+      "Option 'testingisfun99' found but not visible."
+    );
+    await testingisfun99Option.click();
+    console.log("Selected 'testingisfun99' from dropdown.");
+    await driver.sleep(1500); // Give time for selection to register and UI to update
+
+    // --- Click the Login button ---
     const loginButton = await driver.wait(
-      until.elementLocated(By.id("login-btn")), // Assuming the login button has this ID
-      10000, // Wait for button to be located
+      until.elementLocated(By.id("login-btn")),
+      10000,
       "Login button not found."
     );
     console.log("Login button found.");
-
-    // Ensure the button is visible and enabled before clicking
     await driver.wait(
       until.elementIsVisible(loginButton),
       5000,
@@ -131,7 +169,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     // IMPORTANT: Add a robust wait after login attempt to allow for UI updates and dynamic content loading
     await driver.sleep(7000); // Giving ample time for the page to transition/load after button click
 
-    // --- CHECK FOR LOGIN ERROR MESSAGES (optional, but good for diagnostics) ---
+    // --- CHECK FOR LOGIN ERROR MESSAGES (This section is now even more important as it catches the 'Invalid Username' error) ---
     try {
       const errorMessage = await driver.findElement(
         By.css('.api-error, .error-message, [role="alert"]')
@@ -166,21 +204,20 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     }
 
     // --- LOGIN VERIFICATION: Directly check for dashboard elements on the SAME URL ---
-    // As confirmed, content loads on https://www.bstackdemo.com/?signin=true
     console.log(
       `Current URL before dashboard verification: ${await driver.getCurrentUrl()}`
     );
 
-    // Try waiting for the 'demouser' text, as it's the primary indicator
+    // Primary login verification: Wait for 'demouser' text
     try {
       const usernameTextElement = await driver.wait(
         until.elementLocated(By.xpath("//span[contains(text(), 'demouser')]")),
-        30000, // Still 30 seconds for this primary indicator
+        30000,
         "Demouser text not found on page after login attempt. Login likely failed."
       );
       await driver.wait(
         until.elementIsVisible(usernameTextElement),
-        20000, // Wait for visibility
+        20000,
         "Demouser text found but not visible on dashboard within 20 seconds."
       );
       console.log(
@@ -195,8 +232,8 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       console.warn("Attempting secondary verification for dashboard presence.");
       // Fallback: If demouser text fails, try to verify another key dashboard element
       await driver.wait(
-        until.elementLocated(By.css(".sort select")), // The product sort dropdown is a good secondary indicator
-        20000, // Separate wait for fallback
+        until.elementLocated(By.css(".sort select")),
+        20000,
         "Secondary login verification (product sort dropdown) failed. Dashboard content likely not fully loaded."
       );
       console.log(
