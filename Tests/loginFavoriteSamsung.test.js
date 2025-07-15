@@ -311,6 +311,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await favoriteButton.click();
     console.log("Clicked to favorite 'Galaxy S20+'.");
 
+    // Give a small buffer for the favorite action to fully register and for the UI to be ready
+    await driver.sleep(1000); // 1-second delay
+
     // --- Step 4: Verify that the Galaxy S20+ is listed on the Favorites page and is the only element ---
 
     // I find the "Favorites" link on the page by its ID and click it to go to the favorites page.
