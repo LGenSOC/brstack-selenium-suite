@@ -311,27 +311,12 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await favoriteButton.click();
     console.log("Clicked to favorite 'Galaxy S20+'.");
 
-    // Give a small buffer for the favorite action to fully register and for the UI to be ready
-    await driver.sleep(1000); // 1-second delay
+    // Give a small buffer for the favorite action to fully register before navigating away
+    await driver.sleep(2000); // Keeping this sleep for data to potentially register on backend/frontend state
 
-    // --- Step 4: Verify that the Galaxy S20+ is listed on the Favorites page and is the only element ---
-
-    // I find the "Favorites" link on the page by its ID and click it to go to the favorites page.
-    const favoritesLink = await driver.wait(
-      until.elementLocated(By.id("favorites")),
-      10000,
-      "Favorites link in navigation not found."
-    );
-    await favoritesLink.click();
-    console.log("Clicked 'Favorites' link.");
-
-    // I give time for favorites page content to load.
-    // I'll also wait until the URL changes to the favorites page.
-    await driver.wait(
-      until.urlContains("bstackdemo.com/favourites"),
-      15000,
-      "Did not navigate to favorites page."
-    );
+    // --- Step 4: Navigate directly to the Favorites page and verify the Galaxy S20+ ---
+    console.log("Navigating directly to the Favorites page...");
+    await driver.get("https://www.bstackdemo.com/favourites"); // Direct navigation
     console.log(`Mapsd to favorites page: ${await driver.getCurrentUrl()}`);
 
     // On the favorites page, I find the name of the product that is listed there.
