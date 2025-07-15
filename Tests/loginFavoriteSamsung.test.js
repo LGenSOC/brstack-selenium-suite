@@ -296,19 +296,16 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     console.log("Found parent shelf item for 'Galaxy S20+'.");
 
-    // *** CRITICAL CHANGE: Target the heart icon button specifically ***
-    // Find the button within the 'shelf-stopper' div inside the parent shelf item that contains the heart SVG.
-    // The path `*[local-name()='svg']/*[local-name()='path']` specifically looks for SVG elements and their path children,
-    // which is a robust way to locate an icon button using SVG content.
-    const favoriteHeartButton = await parentShelfItem.wait(
-      until.elementLocated(
-        By.xpath(
-          ".//div[@class='shelf-stopper']/button[./span/svg/*[local-name()='path']]"
-        )
-      ),
-      10000,
-      "Favorite heart button not found on Galaxy S20+ item."
+    // Corrected: Find the heart icon button directly within the parentShelfItem
+    // Using `findElement` on `parentShelfItem` to scope the search locally
+    const favoriteHeartButton = await parentShelfItem.findElement(
+      By.xpath(
+        ".//div[@class='shelf-stopper']/button[./span/svg/*[local-name()='path']]"
+      )
     );
+    console.log("Found favorite heart button within 'Galaxy S20+' shelf item.");
+
+    // Ensure the button is visible before clicking
     await driver.wait(
       until.elementIsVisible(favoriteHeartButton),
       5000,
