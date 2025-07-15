@@ -296,23 +296,46 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     console.log("Found parent shelf item for 'Galaxy S20+'.");
 
-    // Inside that product box, I find the heart icon (which is part of the buy button in this case) and click it to favorite.
-    // The class 'shelf-item__buy-btn' often contains the favorite functionality.
-    const favoriteButton = await driver.wait(
-      until.elementLocated(By.css(".shelf-item__buy-btn")),
+    // *** CRITICAL CHANGE: Target the heart icon button specifically ***
+    // Find the button within the 'shelf-stopper' div inside the parent shelf item that contains the heart SVG.
+    // The path `*[local-name()='svg']/*[local-name()='path']` specifically looks for SVG elements and their path children,
+    // which is a robust way to locate an icon button using SVG content.
+    const favoriteHeartButton = await parentShelfItem.wait(
+      until.elementLocated(
+        By.xpath(
+          ".//div[@class='shelf-stopper']/button[./span/svg/*[local-name()='path']]"
+        )
+      ),
       10000,
-      "Favorite button not found on Galaxy S20+ item."
+      "Favorite heart button not found on Galaxy S20+ item."
     );
     await driver.wait(
-      until.elementIsVisible(favoriteButton),
+      until.elementIsVisible(favoriteHeartButton),
       5000,
-      "Favorite button found but not visible."
+      "Favorite heart button found but not visible."
     );
-    await favoriteButton.click();
-    console.log("Clicked to favorite 'Galaxy S20+'.");
+    await favoriteHeartButton.click();
+    console.log("Clicked the heart icon to favorite 'Galaxy S20+'.");
 
-    // Give a small buffer for the favorite action to fully register before navigating away
-    await driver.sleep(2000); // Keeping this sleep for data to potentially register on backend/frontend state
+    // --- Wait for the favorites count to update ---
+    console.log("Waiting for favorites count to update in the header...");
+    const favoritesCountElement = await driver.wait(
+      until.elementLocated(By.id("favorites-count")),
+      10000,
+      "Favorites count element not found in header."
+    );
+    await driver.wait(
+      async () => {
+        const countText = await favoritesCountElement.getText();
+        const count = parseInt(countText, 10);
+        return count > 0;
+      },
+      10000, // This is the timeout for the _condition_ to be met (count > 0)
+      "Favorites count did not update to > 0 within 10 seconds."
+    );
+    console.log(
+      `Favorites count updated to: ${await favoritesCountElement.getText()}`
+    );
 
     // --- Step 4: Navigate directly to the Favorites page and verify the Galaxy S20+ ---
     console.log("Navigating directly to the Favorites page...");
