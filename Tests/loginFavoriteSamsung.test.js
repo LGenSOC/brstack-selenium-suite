@@ -271,23 +271,20 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       10000,
       "Galaxy S20+ product name not found."
     );
-    console.log("Found 'Galaxy S20+' product."); // From that product name, I go up the website's structure to find its main product box (the 'shelf-item').
-
-    const parentShelfItem = await galaxyS20PlusName.findElement(
-      By.xpath("./ancestor::div[contains(@class, 'shelf-item')]")
-    );
-    console.log("Found parent shelf item for 'Galaxy S20+'.");
-
-    // Inside that product box, I find the heart icon button within the 'shelf-stopper' div.
+    console.log("Found 'Galaxy S20+' product."); // Inside that product box, I find the heart icon button within the 'shelf-stopper' div.
     // It's a button with classes 'MuiButtonBase-root' and 'MuiIconButton-root', containing an SVG with a path.
-    const favoriteHeartButton = await parentShelfItem.wait(
+
+    const favoriteHeartButton = await driver.wait(
+      // Corrected: Using driver.wait
       until.elementLocated(
         By.xpath(
-          ".//div[@class='shelf-stopper']/button[contains(@class, 'MuiButtonBase-root') and contains(@class, 'MuiIconButton-root') and .//*[local-name()='svg']]"
+          // Using XPath to locate the button specific to the Galaxy S20+ shelf-item
+          "//div[contains(@class, 'shelf-item') and .//p[contains(text(), 'Galaxy S20+')]]" +
+            "//div[@class='shelf-stopper']/button[contains(@class, 'MuiButtonBase-root') and contains(@class, 'MuiIconButton-root') and .//*[local-name()='svg']]"
         )
       ),
       10000,
-      "Favorite heart button not found within Galaxy S20+ item's shelf-stopper."
+      "Favorite heart button not found for Galaxy S20+ within shelf-stopper."
     );
     console.log("Found favorite heart button within 'Galaxy S20+' shelf item.");
 
@@ -297,10 +294,9 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       "Favorite button found but not visible."
     );
     await favoriteHeartButton.click();
-    console.log("Clicked to favorite 'Galaxy S20+'.");
-
-    // As per your instruction, removed the favorites count verification.
+    console.log("Clicked to favorite 'Galaxy S20+'."); // As per your instruction, removed the favorites count verification.
     // However, it's still good practice to have a small pause to allow the action to register on the UI.
+
     await driver.sleep(2000); // --- Step 4: Navigate directly to the Favorites page and verify the Galaxy S20+ ---
 
     console.log("Navigating directly to the Favorites page...");
