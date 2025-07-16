@@ -37,7 +37,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       .build();
 
     await driver.get("https://www.bstackdemo.com/signin");
-    console.log(`Mapped to: ${await driver.getCurrentUrl()}`); // Corrected typo
+    console.log(`Mapped to: ${await driver.getCurrentUrl()}`);
 
     // *** Keep this robust wait for page content to load after navigation ***
     try {
@@ -180,14 +180,18 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
           `Login failed: Found "Invalid Username" error message on page: "${errorText}"`
         );
         throw new Error(`Login failed due to error message: "${errorText}"`);
-      } else if (errorText.length > 0) {
-        console.warn(
-          `Found other error message after login: "${errorText}". Proceeding if not "Invalid Username".`
-        );
       } else {
-        console.log(
-          "No explicit error message text found after login attempt."
-        );
+        // If an error message is found but it's not "Invalid Username", just warn and proceed.
+        // This allows the test to continue if it's a non-blocking UI message.
+        if (errorText.length > 0) {
+          console.warn(
+            `Found other error message after login: "${errorText}". Proceeding if not "Invalid Username".`
+          );
+        } else {
+          console.log(
+            "No explicit error message text found after login attempt."
+          );
+        }
       }
     } catch (e) {
       if (e.name === "NoSuchElementError") {
@@ -312,8 +316,23 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await favoriteHeartButton.click();
     console.log("Clicked to favorite 'Galaxy S20+'.");
 
-    // Add a longer pause to ensure the favoriting action registers
-    await driver.sleep(4000); // Increased from 2000ms
+    // NEW: Explicit wait for the heart icon to change state to 'favorited'
+    // We'll look for the presence of the 'clicked' class on the button itself.
+    // The presence of the 'clicked' class suggests the favoriting action has registered visually.
+    await driver.wait(
+      until.elementLocated(
+        By.xpath(
+          "//div[contains(@class, 'shelf-item') and .//p[contains(text(), 'Galaxy S20+')]]" +
+            "//div[@class='shelf-stopper']/button[contains(@class, 'Button') and contains(@class, 'clicked')]"
+        )
+      ),
+      10000, // Give it up to 10 seconds to show the 'clicked' state
+      "Favorite button did not show 'clicked' state for Galaxy S20+."
+    );
+    console.log("Verified: Favorite button shows 'clicked' state.");
+
+    // Small static pause after confirming visual change before navigation
+    await driver.sleep(2000);
 
     // --- Step 4: Navigate directly to the Favorites page and verify the Galaxy S20+ ---
     console.log("Navigating directly to the Favorites page...");
