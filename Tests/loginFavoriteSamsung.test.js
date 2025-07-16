@@ -296,28 +296,22 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     console.log("Found parent shelf item for 'Galaxy S20+'.");
 
-    // *** CRITICAL CHANGE: Target the heart icon button specifically ***
-    // Find the button within the 'shelf-stopper' div inside the parent shelf item that contains the heart SVG.
-    // The path `*[local-name()='svg']/*[local-name()='path']` specifically looks for SVG elements and their path children,
-    // which is a robust way to locate an icon button using SVG content.
-    const favoriteHeartButton = await parentShelfItem.wait(
-      until.elementLocated(
-        By.xpath(
-          ".//div[@class='shelf-stopper']/button[./span/svg/*[local-name()='path']]"
-        )
-      ),
+    // Inside that product box, I find the heart icon (which is part of the buy button in this case) and click it to favorite.
+    // The class 'shelf-item__buy-btn' often contains the favorite functionality.
+    const favoriteButton = await driver.wait(
+      until.elementLocated(By.css(".shelf-item__buy-btn")),
       10000,
-      "Favorite heart button not found on Galaxy S20+ item."
+      "Favorite button not found on Galaxy S20+ item."
     );
     await driver.wait(
-      until.elementIsVisible(favoriteHeartButton),
+      until.elementIsVisible(favoriteButton),
       5000,
-      "Favorite heart button found but not visible."
+      "Favorite button found but not visible."
     );
-    await favoriteHeartButton.click();
-    console.log("Clicked the heart icon to favorite 'Galaxy S20+'.");
+    await favoriteButton.click();
+    console.log("Clicked to favorite 'Galaxy S20+'.");
 
-    // --- Wait for the favorites count to update ---
+    // --- NEW: Wait for the favorites count to update ---
     console.log("Waiting for favorites count to update in the header...");
     const favoritesCountElement = await driver.wait(
       until.elementLocated(By.id("favorites-count")),
@@ -330,7 +324,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         const count = parseInt(countText, 10);
         return count > 0;
       },
-      10000, // This is the timeout for the _condition_ to be met (count > 0)
+      10000,
       "Favorites count did not update to > 0 within 10 seconds."
     );
     console.log(
