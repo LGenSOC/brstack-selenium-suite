@@ -9,10 +9,9 @@ const { capabilities } = require("../browserstack.config");
 // I'm giving my test suite a name: "Bstackdemo Login and Samsung Galaxy S20+ Favorite Test".
 describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
   // This variable will hold my web browser driver, which is what controls the browser.
-  let driver;
-
-  // 'beforeEach' means "I do this code before *every* single test starts."
+  let driver; // 'beforeEach' means "I do this code before *every* single test starts."
   // It's good for setting up my browser and going to the website each time.
+
   beforeEach(async () => {
     // I verify my credentials are available before starting
     if (
@@ -27,8 +26,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       // I explicitly set credentials to ensure they're fresh
       "browserstack.user": process.env.BROWSERSTACK_USERNAME,
       "browserstack.key": process.env.BROWSERSTACK_ACCESS_KEY,
-    };
-    // I build the driver with credentials in both URL and capabilities
+    }; // I build the driver with credentials in both URL and capabilities
     driver = await new Builder()
       .usingServer(
         `https://${process.env.BROWSERSTACK_USERNAME}:${process.env.BROWSERSTACK_ACCESS_KEY}@hub-cloud.browserstack.com/wd/hub`
@@ -37,9 +35,8 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       .build();
 
     await driver.get("https://www.bstackdemo.com/signin");
-    console.log(`Mapsd to: ${await driver.getCurrentUrl()}`);
+    console.log(`Mapsd to: ${await driver.getCurrentUrl()}`); // *** Keep this robust wait for page content to load after navigation ***
 
-    // *** Keep this robust wait for page content to load after navigation ***
     try {
       // Wait for the main content container of the Next.js app to be visible
       await driver.wait(
@@ -65,27 +62,25 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         )}`
       );
       throw error; // Re-throw to fail the test if the page doesn't load
-    }
-    // Give a short, static pause as a buffer after initial DOM load
+    } // Give a short, static pause as a buffer after initial DOM load
     await driver.sleep(1500);
   }, 60000); // Set timeout for beforeEach hook (60 seconds)
-
   // 'afterEach' means "I do this code after *every* single test finishes."
+
   afterEach(async () => {
     if (driver) {
       // If the browser is open, I close it cleanly.
       await driver.quit();
     }
   }, 60000); // Set timeout for afterEach hook (60 seconds)
-
   // 'it' is one single test. I give it a clear name about what it should do.
+
   test("should log in, filter Samsung, favorite Galaxy S20+, and verify on favorites page", async () => {
     // --- Step 1: Log into www.bstackdemo.com ---
     console.log(
       "Attempting login using click-dropdown-option strategy for React Select components."
-    );
+    ); // --- Username selection ---
 
-    // --- Username selection ---
     const usernameDropdownWrapper = await driver.wait(
       until.elementLocated(By.id("username")),
       15000,
@@ -95,17 +90,16 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await usernameDropdownWrapper.click();
     console.log("Clicked username dropdown wrapper to open options.");
     await driver.sleep(1500); // Give a bit more time for options to render in the DOM
-
     // Locate the specific 'demouser' option by its text content and a common React Select ID pattern
     // This assumes the options are `div` elements with an ID starting with `react-select` and have the exact text.
+
     const demouserOption = await driver.wait(
       until.elementLocated(
         By.xpath("//div[contains(@id, 'react-select') and text()='demouser']")
       ),
       10000,
       "Specific option 'demouser' not found in username dropdown."
-    );
-    // Ensure the option is visible before attempting to click it
+    ); // Ensure the option is visible before attempting to click it
     await driver.wait(
       until.elementIsVisible(demouserOption),
       5000,
@@ -114,8 +108,8 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await demouserOption.click();
     console.log("Selected 'demouser' from dropdown.");
     await driver.sleep(1500); // Give time for selection to register and UI to update
-
     // --- Password selection (similar logic) ---
+
     const passwordDropdownWrapper = await driver.wait(
       until.elementLocated(By.id("password")),
       15000,
@@ -125,8 +119,8 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await passwordDropdownWrapper.click();
     console.log("Clicked password dropdown wrapper to open options.");
     await driver.sleep(1500); // Give a bit more time for options to render
-
     // Locate the specific 'testingisfun99' option by its text content and a common React Select ID pattern
+
     const testingisfun99Option = await driver.wait(
       until.elementLocated(
         By.xpath(
@@ -135,8 +129,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       ),
       10000,
       "Specific option 'testingisfun99' not found in password dropdown."
-    );
-    // Ensure the option is visible before attempting to click it
+    ); // Ensure the option is visible before attempting to click it
     await driver.wait(
       until.elementIsVisible(testingisfun99Option),
       5000,
@@ -145,8 +138,8 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     await testingisfun99Option.click();
     console.log("Selected 'testingisfun99' from dropdown.");
     await driver.sleep(1500); // Give time for selection to register and UI to update
-
     // --- Click the Login button ---
+
     const loginButton = await driver.wait(
       until.elementLocated(By.id("login-btn")),
       10000,
@@ -164,12 +157,11 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       "Login button not enabled."
     );
     await loginButton.click();
-    console.log("Clicked login button.");
+    console.log("Clicked login button."); // IMPORTANT: Add a robust wait after login attempt to allow for UI updates and dynamic content loading
 
-    // IMPORTANT: Add a robust wait after login attempt to allow for UI updates and dynamic content loading
     await driver.sleep(7000); // Giving ample time for the page to transition/load after button click
-
     // --- CHECK FOR LOGIN ERROR MESSAGES (This section is now even more important as it catches the 'Invalid Username' error) ---
+
     try {
       const errorMessage = await driver.findElement(
         By.css('.api-error, .error-message, [role="alert"]')
@@ -201,14 +193,12 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
         );
         throw e;
       }
-    }
+    } // --- LOGIN VERIFICATION: Directly check for dashboard elements on the SAME URL ---
 
-    // --- LOGIN VERIFICATION: Directly check for dashboard elements on the SAME URL ---
     console.log(
       `Current URL before dashboard verification: ${await driver.getCurrentUrl()}`
-    );
+    ); // Primary login verification: Wait for 'demouser' text
 
-    // Primary login verification: Wait for 'demouser' text
     try {
       const usernameTextElement = await driver.wait(
         until.elementLocated(By.xpath("//span[contains(text(), 'demouser')]")),
@@ -229,8 +219,7 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       console.warn(
         `Primary login verification (demouser text) failed: ${error.message}`
       );
-      console.warn("Attempting secondary verification for dashboard presence.");
-      // Fallback: If demouser text fails, try to verify another key dashboard element
+      console.warn("Attempting secondary verification for dashboard presence."); // Fallback: If demouser text fails, try to verify another key dashboard element
       await driver.wait(
         until.elementLocated(By.css(".sort select")), // This is the sorting dropdown, not a filter. It should be there.
         20000,
@@ -239,12 +228,10 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       console.log(
         "Secondary login verification passed: Product sort/filter dropdown found, confirming dashboard content."
       );
-    }
-
-    // --- Step 2: Filter the products to show "Samsung" devices only ---
-
+    } // --- Step 2: Filter the products to show "Samsung" devices only ---
     // I find the specific 'Samsung' filter by targeting its span with class 'checkmark'
     // nested within a label that contains an input with value 'Samsung'
+
     const samsungFilterCheckboxSpan = await driver.wait(
       until.elementLocated(
         By.xpath(
@@ -260,17 +247,15 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       "The 'Samsung' filter checkmark span found but not visible."
     );
     await samsungFilterCheckboxSpan.click();
-    console.log("Selected 'Samsung' filter (checkmark span) from sidebar.");
+    console.log("Selected 'Samsung' filter (checkmark span) from sidebar."); // I wait up to 10 seconds for the loading spinner to disappear, which means the filter has finished applying.
 
-    // I wait up to 10 seconds for the loading spinner to disappear, which means the filter has finished applying.
     await driver.wait(
       until.stalenessOf(driver.findElement(By.css(".spinner"))),
       10000,
       "Spinner did not disappear within 10 seconds after filter selection."
     );
-    console.log("Waited for filter to apply.");
+    console.log("Waited for filter to apply."); // I will still ensure *some* products are loaded after filtering to confirm the page re-rendered.
 
-    // I will still ensure *some* products are loaded after filtering to confirm the page re-rendered.
     await driver.wait(
       until.elementsLocated(By.css(".shelf-item .shelf-item__title")),
       15000,
@@ -278,66 +263,51 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
     );
     console.log(
       "Verified: Products are displayed after filtering (assuming the filter worked correctly)."
-    );
-
-    // --- Step 3: Favorite the "Galaxy S20+" device by clicking the heart icon ---
-
+    ); // --- Step 3: Favorite the "Galaxy S20+" device by clicking the heart icon ---
     // I find the text "Galaxy S20+" on the page.
+
     const galaxyS20PlusName = await driver.wait(
       until.elementLocated(By.xpath("//p[contains(text(), 'Galaxy S20+')]")),
       10000,
       "Galaxy S20+ product name not found."
     );
-    console.log("Found 'Galaxy S20+' product.");
+    console.log("Found 'Galaxy S20+' product."); // From that product name, I go up the website's structure to find its main product box (the 'shelf-item').
 
-    // From that product name, I go up the website's structure to find its main product box (the 'shelf-item').
     const parentShelfItem = await galaxyS20PlusName.findElement(
       By.xpath("./ancestor::div[contains(@class, 'shelf-item')]")
     );
     console.log("Found parent shelf item for 'Galaxy S20+'.");
 
-    // Inside that product box, I find the heart icon (which is part of the buy button in this case) and click it to favorite.
-    // The class 'shelf-item__buy-btn' often contains the favorite functionality.
-    const favoriteButton = await driver.wait(
-      until.elementLocated(By.css(".shelf-item__buy-btn")),
+    // Inside that product box, I find the heart icon button within the 'shelf-stopper' div.
+    // It's a button with classes 'MuiButtonBase-root' and 'MuiIconButton-root', containing an SVG with a path.
+    const favoriteHeartButton = await parentShelfItem.wait(
+      until.elementLocated(
+        By.xpath(
+          ".//div[@class='shelf-stopper']/button[contains(@class, 'MuiButtonBase-root') and contains(@class, 'MuiIconButton-root') and .//*[local-name()='svg']]"
+        )
+      ),
       10000,
-      "Favorite button not found on Galaxy S20+ item."
+      "Favorite heart button not found within Galaxy S20+ item's shelf-stopper."
     );
+    console.log("Found favorite heart button within 'Galaxy S20+' shelf item.");
+
     await driver.wait(
-      until.elementIsVisible(favoriteButton),
+      until.elementIsVisible(favoriteHeartButton),
       5000,
       "Favorite button found but not visible."
     );
-    await favoriteButton.click();
+    await favoriteHeartButton.click();
     console.log("Clicked to favorite 'Galaxy S20+'.");
 
-    // --- NEW: Wait for the favorites count to update ---
-    console.log("Waiting for favorites count to update in the header...");
-    const favoritesCountElement = await driver.wait(
-      until.elementLocated(By.id("favorites-count")),
-      10000,
-      "Favorites count element not found in header."
-    );
-    await driver.wait(
-      async () => {
-        const countText = await favoritesCountElement.getText();
-        const count = parseInt(countText, 10);
-        return count > 0;
-      },
-      10000,
-      "Favorites count did not update to > 0 within 10 seconds."
-    );
-    console.log(
-      `Favorites count updated to: ${await favoritesCountElement.getText()}`
-    );
+    // As per your instruction, removed the favorites count verification.
+    // However, it's still good practice to have a small pause to allow the action to register on the UI.
+    await driver.sleep(2000); // --- Step 4: Navigate directly to the Favorites page and verify the Galaxy S20+ ---
 
-    // --- Step 4: Navigate directly to the Favorites page and verify the Galaxy S20+ ---
     console.log("Navigating directly to the Favorites page...");
     await driver.get("https://www.bstackdemo.com/favourites"); // Direct navigation
-    console.log(`Mapsd to favorites page: ${await driver.getCurrentUrl()}`);
-
-    // On the favorites page, I find the name of the product that is listed there.
+    console.log(`Mapsd to favorites page: ${await driver.getCurrentUrl()}`); // On the favorites page, I find the name of the product that is listed there.
     // I'll wait until the Galaxy S20+ element appears on this new page.
+
     const favoriteProductNameElement = await driver.wait(
       until.elementLocated(By.xpath("//p[contains(text(), 'Galaxy S20+')]")),
       15000,
@@ -348,22 +318,19 @@ describe("Bstackdemo Login and Samsung Galaxy S20+ Favorite Test", () => {
       5000,
       "Galaxy S20+ found on favorites page but not visible."
     );
-    const favoriteProductName = await favoriteProductNameElement.getText();
-    // I check if that product name includes "Galaxy S20+".
+    const favoriteProductName = await favoriteProductNameElement.getText(); // I check if that product name includes "Galaxy S20+".
     expect(favoriteProductName).toContain("Galaxy S20+");
-    console.log("Verified: 'Galaxy S20+' is listed on the Favorites page.");
-
-    // Additionally, verify that it is the only element on the favorites page.
+    console.log("Verified: 'Galaxy S20+' is listed on the Favorites page."); // Additionally, verify that it is the only element on the favorites page.
     // We can count all product items on the favorites page.
+
     const allFavoriteProducts = await driver.findElements(
       By.css(".shelf-item")
     );
     expect(allFavoriteProducts.length).toBe(1);
     console.log(
       "Verified: Galaxy S20+ is the only item on the Favorites page."
-    );
+    ); // If all checks pass, I can say the test passed!
 
-    // If all checks pass, I can say the test passed!
     console.log("--- TEST PASSED SUCCESSFULLY! ---");
   }, 120000); // Increased overall test timeout to 120 seconds (2 minutes)
 });
